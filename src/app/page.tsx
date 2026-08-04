@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Fingerprint, Eye } from "lucide-react";
+import { Fingerprint, Eye, XCircle, CheckCircle2, X } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -67,7 +67,9 @@ export default function Home() {
 
         if (signInError) throw signInError;
         setMessage("Login berhasil! Mengalihkan ke dashboard...");
-        router.push("/dashboard");
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
       }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan yang tidak terduga.");
@@ -137,9 +139,7 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Pesan Error & Sukses */}
-          {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">{error}</div>}
-          {message && <div className="mb-4 p-3 bg-green-50 text-green-600 text-sm rounded-lg border border-green-100">{message}</div>}
+          {/* Pesan Error & Sukses (Kini pindah ke Toast Popup di bawah) */}
 
           {/* Custom Form */}
           <div className="flex-1 w-full">
@@ -258,7 +258,7 @@ export default function Home() {
                   disabled={loading}
                   className="w-full bg-black text-white rounded-xl py-3.5 font-semibold text-sm hover:bg-gray-900 transition-all shadow-sm disabled:opacity-50"
                 >
-                  {loading ? "Memproses..." : (view === "sign_in" ? "Sign In" : "Register")}
+                  {view === "sign_in" ? "Sign In" : "Register"}
                 </button>
 
                 {/* Google Sign In Button */}
@@ -289,6 +289,41 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Toast Popup */}
+      {(error || message) && (
+        <div className="fixed top-6 right-6 z-50 animate-in fade-in slide-in-from-top-5 duration-300">
+          <div className={`rounded-xl shadow-2xl border p-4 max-w-[320px] w-full flex items-start gap-3 backdrop-blur-md ${
+            error 
+              ? "bg-white/90 border-red-200 text-gray-900" 
+              : "bg-gray-900/95 border-gray-800 text-white"
+          }`}>
+            <div className="shrink-0 mt-0.5">
+              {error ? (
+                <XCircle className="w-5 h-5 text-red-500" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+              )}
+            </div>
+            <div className="flex-1">
+              <h3 className={`text-sm font-bold ${error ? "text-gray-900" : "text-white"}`}>
+                {error ? "Oops! Terjadi Kesalahan" : "Berhasil!"}
+              </h3>
+              <p className={`text-xs mt-1 leading-relaxed ${error ? "text-gray-600" : "text-gray-300"}`}>
+                {error || message}
+              </p>
+            </div>
+            <button 
+              onClick={() => { setError(null); setMessage(null); }}
+              className={`shrink-0 p-1 rounded-md transition-colors ${
+                error ? "text-gray-400 hover:bg-gray-100" : "text-gray-400 hover:bg-gray-800 hover:text-white"
+              }`}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
