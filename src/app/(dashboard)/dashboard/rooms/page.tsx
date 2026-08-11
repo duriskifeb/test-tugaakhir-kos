@@ -21,7 +21,7 @@ export default function RoomsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Rooms Management</h1>
-          <p className="text-gray-500 mt-1">Manage your property's room inventory and availability.</p>
+          <p className="text-gray-500 mt-1">Manage your property&apos;s room inventory and availability.</p>
         </div>
         <button className="bg-[#3b23c6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2a1796] transition-colors shadow-sm flex items-center gap-2 w-fit">
           <Plus className="w-4 h-4" />
@@ -82,7 +82,6 @@ export default function RoomsPage() {
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200">
-                        {/* Placeholder image icon */}
                         <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -91,7 +90,7 @@ export default function RoomsPage() {
                     </div>
                   </td>
                   <td className="p-4 text-sm text-gray-600">{room.type}</td>
-                  <td className="p-4 text-sm font-medium text-gray-900">Rp {room.price.toLocaleString('id-ID')}</td>
+                  <td className="p-4 text-sm font-medium text-gray-900">Rp {room.price.toLocaleString("id-ID")}</td>
                   <td className="p-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
                       room.status === "Occupied" 
@@ -122,7 +121,6 @@ export default function RoomsPage() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    {/* Fallback mobile menu */}
                     <button className="p-1.5 text-gray-400 hover:text-gray-900 rounded-md sm:hidden">
                       <MoreVertical className="w-4 h-4" />
                     </button>

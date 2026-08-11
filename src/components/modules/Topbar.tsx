@@ -3,12 +3,7 @@
 import { Search, Bell, HelpCircle, LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-// Inisialisasi Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dummy-project.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "dummy-anon-key";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { createClient } from "@/lib/supabase/client";
 
 export function Topbar() {
   const router = useRouter();
@@ -27,8 +22,9 @@ export function Topbar() {
   }, []);
 
   const handleLogout = async () => {
+    const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/"); // Kembali ke halaman login
+    router.push("/login");
   };
 
   return (

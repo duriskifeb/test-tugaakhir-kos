@@ -1,0 +1,5 @@
+# api/ — Custom API Route Handlers
+# Folder ini untuk Next.js Route Handlers (webhook, custom endpoints).
+# Contoh:
+# - route.ts (GET /api/rooms)
+# - webhook/route.ts (POST /api/webhook)

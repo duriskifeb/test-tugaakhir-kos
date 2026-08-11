@@ -81,7 +81,6 @@ export default function DashboardPage() {
           <h3 className="text-xs font-semibold text-gray-500 mb-1">New Tenants</h3>
           <span className="text-2xl font-bold text-gray-900">12</span>
           <div className="flex items-center mt-2">
-            {/* Mock Avatars */}
             <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white z-10" />
             <div className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white -ml-2 z-20" />
             <div className="w-6 h-6 rounded-full bg-[#3b23c6] border-2 border-white -ml-2 z-30 flex items-center justify-center text-[8px] font-bold text-white">
@@ -125,19 +124,14 @@ export default function DashboardPage() {
             
             {/* Chart Skeleton (SVG Curve) */}
             <div className="h-64 w-full relative">
-              {/* Y-axis mock lines */}
               <div className="absolute inset-0 flex flex-col justify-between">
                 {[1,2,3,4,5].map((i) => (
                   <div key={i} className="w-full h-px bg-gray-100" />
                 ))}
               </div>
-              
-              {/* SVG Line curve */}
               <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                 <path d="M 0,80 Q 25,70 50,50 T 100,30" fill="none" stroke="#3b23c6" strokeWidth="2" vectorEffect="non-scaling-stroke" />
               </svg>
-
-              {/* X-axis labels */}
               <div className="absolute bottom-[-24px] left-0 right-0 flex justify-between text-[10px] font-semibold text-gray-500 uppercase">
                 <span>Jan</span>
                 <span>Feb</span>
@@ -254,13 +248,11 @@ export default function DashboardPage() {
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm h-48 relative overflow-hidden flex flex-col">
             <h2 className="text-xs font-bold text-gray-900 bg-white px-2 py-1 absolute top-4 left-4 z-10 rounded shadow-sm">Live Portfolio Map</h2>
             <div className="absolute inset-0 bg-[#e2e8f0] opacity-50 flex items-center justify-center">
-              {/* Fake Map Grid */}
               <div className="w-full h-full bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:1rem_1rem]" />
             </div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#3b23c6] rounded-full border-2 border-white shadow-[0_0_0_4px_rgba(59,35,198,0.2)]" />
             <div className="absolute top-1/3 left-1/4 transform w-3 h-3 bg-[#3b23c6] rounded-full border-2 border-white shadow-[0_0_0_4px_rgba(59,35,198,0.2)]" />
           </div>
-
         </div>
       </div>
 

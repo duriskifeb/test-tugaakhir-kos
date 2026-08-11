@@ -1,0 +1,10 @@
+# ui/ — Base UI Components
+# Folder ini untuk komponen UI dasar yang reusable:
+# - Button.tsx
+# - Input.tsx
+# - Modal.tsx
+# - Badge.tsx
+# - Card.tsx
+# - dll.
+#
+# Bisa menggunakan Shadcn/ui: npx shadcn@latest add button

@@ -8,10 +8,10 @@ export default function WebsiteBuilderPage() {
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row bg-[#fafafa]">
-      
+
       {/* KIRI: Panel Konfigurasi (Editor) */}
       <div className="w-full md:w-1/3 min-w-[320px] bg-white border-r border-gray-200 flex flex-col h-full z-10 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        
+
         <div className="p-6 border-b border-gray-200 flex items-center justify-between shrink-0">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Website Builder</h1>
@@ -24,17 +24,17 @@ export default function WebsiteBuilderPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          
+
           {/* Section: Identitas */}
           <section>
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <LayoutTemplate className="w-4 h-4 text-[#3b23c6]" /> 
+              <LayoutTemplate className="w-4 h-4 text-[#3b23c6]" />
               Identity
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Property Name</label>
-                <input type="text" defaultValue="The Grand Dormitory" className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-[#3b23c6] focus:ring-1 focus:ring-[#3b23c6] outline-none" />
+                <input type="text" defaultValue="The Grand Pintu-Berkah" className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-[#3b23c6] focus:ring-1 focus:ring-[#3b23c6] outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline / Description</label>
@@ -46,15 +46,15 @@ export default function WebsiteBuilderPage() {
           {/* Section: Subdomain */}
           <section>
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#3b23c6]" /> 
+              <Globe className="w-4 h-4 text-[#3b23c6]" />
               Domain
             </h2>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Free Subdomain</label>
               <div className="flex">
-                <input type="text" defaultValue="grand-dormitory" className="flex-1 px-3 py-2 bg-gray-50 border border-r-0 border-gray-200 rounded-l-lg text-sm focus:border-[#3b23c6] focus:ring-1 focus:ring-[#3b23c6] outline-none text-right" />
+                <input type="text" defaultValue="grand-Pintu-Berkah" className="flex-1 px-3 py-2 bg-gray-50 border border-r-0 border-gray-200 rounded-l-lg text-sm focus:border-[#3b23c6] focus:ring-1 focus:ring-[#3b23c6] outline-none text-right" />
                 <span className="inline-flex items-center px-3 rounded-r-lg border border-l-0 border-gray-200 bg-gray-100 text-gray-500 sm:text-sm font-medium">
-                  .dormispace.com
+                  .Pintu_Berkah.com
                 </span>
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function WebsiteBuilderPage() {
           {/* Section: Tema */}
           <section>
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Palette className="w-4 h-4 text-[#3b23c6]" /> 
+              <Palette className="w-4 h-4 text-[#3b23c6]" />
               Theme Colors
             </h2>
             <div className="flex gap-4">
@@ -87,7 +87,7 @@ export default function WebsiteBuilderPage() {
           {/* Section: Kontak */}
           <section>
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Phone className="w-4 h-4 text-[#3b23c6]" /> 
+              <Phone className="w-4 h-4 text-[#3b23c6]" />
               Contact Info
             </h2>
             <div>
@@ -106,17 +106,17 @@ export default function WebsiteBuilderPage() {
 
       {/* KANAN: Live Preview Panel */}
       <div className="flex-1 bg-gray-100 h-full flex flex-col">
-        
+
         {/* Preview Toolbar */}
         <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-            <button 
+            <button
               onClick={() => setDevice("desktop")}
               className={`p-1.5 rounded-md transition-colors ${device === "desktop" ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-black"}`}
             >
               <Monitor className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => setDevice("mobile")}
               className={`p-1.5 rounded-md transition-colors ${device === "mobile" ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-black"}`}
             >
@@ -130,12 +130,11 @@ export default function WebsiteBuilderPage() {
 
         {/* Preview Canvas */}
         <div className="flex-1 overflow-auto p-4 sm:p-8 flex items-start justify-center">
-          
+
           {/* Mockup Frame */}
-          <div className={`bg-white rounded-t-xl sm:rounded-2xl shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out origin-top ${
-            device === "desktop" ? "w-full max-w-5xl h-[800px]" : "w-[375px] h-[812px]"
-          }`}>
-            
+          <div className={`bg-white rounded-t-xl sm:rounded-2xl shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out origin-top ${device === "desktop" ? "w-full max-w-5xl h-[800px]" : "w-[375px] h-[812px]"
+            }`}>
+
             {/* Fake Browser Top (hanya untuk desktop) */}
             {device === "desktop" && (
               <div className="h-10 bg-gray-100 border-b border-gray-200 flex items-center px-4 gap-2 shrink-0">
@@ -145,24 +144,24 @@ export default function WebsiteBuilderPage() {
                   <div className="w-3 h-3 rounded-full bg-green-400" />
                 </div>
                 <div className="ml-4 bg-white px-3 py-1 rounded text-xs text-gray-500 font-mono w-64 text-center border border-gray-200 shadow-sm truncate">
-                  grand-dormitory.dormispace.com
+                  grand-Pintu-Berkah.com
                 </div>
               </div>
             )}
 
             {/* Konten Web Preview (Dummy) */}
             <div className="w-full h-full overflow-y-auto bg-white flex flex-col">
-              
+
               {/* Navbar Preview */}
               <nav className="px-6 py-4 flex items-center justify-between border-b border-gray-100 shrink-0">
-                <span className="font-bold text-lg text-[#3b23c6]">The Grand Dormitory</span>
+                <span className="font-bold text-lg text-[#3b23c6]">The Grand Pintu-Berkah</span>
                 <button className="bg-[#3b23c6] text-white px-4 py-2 rounded-lg text-sm font-semibold">Book Now</button>
               </nav>
 
               {/* Hero Preview */}
               <div className="bg-[#3b23c6]/5 px-6 py-16 md:py-24 text-center border-b border-gray-100 shrink-0">
                 <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-                  Premium student living <br/>in the heart of the city.
+                  Premium student living <br />in the heart of the city.
                 </h2>
                 <p className="text-gray-500 max-w-lg mx-auto mb-8">
                   Comfortable, secure, and fully furnished boarding houses tailored for your best living experience.
@@ -188,7 +187,7 @@ export default function WebsiteBuilderPage() {
                       </div>
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-gray-900">Kamar Tipe {i === 1 ? 'VIP' : 'Standard'}</h4>
+                          <h4 className="font-bold text-gray-900">Kamar Tipe {i === 1 ? "VIP" : "Standard"}</h4>
                           <span className="text-[#10b981] bg-[#10b981]/10 px-2 py-1 rounded text-[10px] font-bold">Kosong</span>
                         </div>
                         <p className="text-xl font-bold text-[#3b23c6] mb-4">Rp 2.5jt<span className="text-sm font-normal text-gray-500">/bln</span></p>
