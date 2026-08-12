@@ -14,14 +14,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Cogie — Manajemen Kos Modern",
-    template: "%s | Cogie",
+    default: "Pintu Berkah — Manajemen Kos Modern",
+    template: "%s | Pintu Berkah",
   },
   description:
     "Platform manajemen kos-kosan all-in-one. Kelola kamar, penyewa, pembayaran, dan bangun website booking properti Anda dengan mudah.",
   keywords: ["kos", "kosan", "manajemen properti", "booking kamar", "indekos"],
-  authors: [{ name: "Cogie" }],
-  creator: "Cogie",
+  authors: [{ name: "Pintu Berkah" }],
+  creator: "Pintu Berkah",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

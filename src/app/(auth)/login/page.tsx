@@ -41,7 +41,7 @@ export default function LoginPage() {
           throw new Error("Password dan Konfirmasi Password tidak cocok.");
         }
 
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -53,6 +53,17 @@ export default function LoginPage() {
         });
 
         if (signUpError) throw signUpError;
+        
+        // Manual insert ke tabel profiles karena trigger sudah dihapus
+        if (signUpData.user) {
+          await supabase.from("profiles").upsert({
+            id: signUpData.user.id,
+            full_name: fullName,
+            phone: phone,
+            updated_at: new Date().toISOString()
+          });
+        }
+
         setMessage(
           "Registrasi berhasil! Silakan cek email Anda untuk verifikasi (jika diaktifkan di Supabase), atau langsung login."
         );
@@ -69,9 +80,28 @@ export default function LoginPage() {
           router.push("/dashboard");
         }, 1500);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Terjadi kesalahan yang tidak terduga.";
-      setError(message);
+    } catch (err: any) {
+      console.error("Login/Register error full object:", err);
+      let errorMsg = "Terjadi kesalahan yang tidak terduga.";
+      
+      if (err?.message) {
+        errorMsg = err.message;
+      } else if (typeof err === "string") {
+        errorMsg = err;
+      } else if (err && typeof err === "object") {
+        try {
+          // Coba ambil properti yang mungkin ada di error Supabase
+          const keys = Object.keys(err);
+          errorMsg = keys.length ? JSON.stringify(err) : String(err);
+          
+          if (err.name) errorMsg = `${err.name}: ${errorMsg}`;
+          if (err.status) errorMsg = `Status ${err.status}: ${errorMsg}`;
+        } catch (e) {
+          errorMsg = "Gagal memproses detail error.";
+        }
+      }
+      
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -136,7 +166,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-center gap-2 mb-12">
             <Fingerprint className="w-5 h-5 text-black" />
             <span className="text-lg font-bold text-black tracking-tight">
-              Cogie
+              Pintu Berkah
             </span>
           </div>
 

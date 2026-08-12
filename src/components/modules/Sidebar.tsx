@@ -27,7 +27,7 @@ const mainNavItems = [
   { name: "Staff Management", href: "/dashboard/staff", icon: UserCog },
 ];
 
-export function Sidebar() {
+export function Sidebar({ hasBoardingHouse = true }: { hasBoardingHouse?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -40,7 +40,7 @@ export function Sidebar() {
 
       {/* Main Navigation */}
       <nav className="flex-1 px-3 space-y-1">
-        {mainNavItems.map((item) => {
+        {hasBoardingHouse && mainNavItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
@@ -58,15 +58,17 @@ export function Sidebar() {
         })}
 
         {/* Website Builder Special Button */}
-        <div className="pt-4 pb-2">
-          <Link
-            href="/dashboard/website-builder"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-[#ede9fe] text-[#3b23c6] hover:bg-[#ddd6fe] transition-colors"
-          >
-            <MonitorSmartphone className="w-5 h-5 text-[#3b23c6]" />
-            Website Builder
-          </Link>
-        </div>
+        {hasBoardingHouse && (
+          <div className="pt-4 pb-2">
+            <Link
+              href="/dashboard/website-builder"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-[#ede9fe] text-[#3b23c6] hover:bg-[#ddd6fe] transition-colors"
+            >
+              <MonitorSmartphone className="w-5 h-5 text-[#3b23c6]" />
+              Website Builder
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Footer Navigation */}

@@ -55,6 +55,7 @@ export interface Database {
           primary_color: string | null;
           accent_color: string | null;
           whatsapp: string | null;
+          status: "UNVERIFIED" | "VERIFIED";
           created_at: string;
           updated_at: string;
         };
@@ -68,6 +69,7 @@ export interface Database {
           primary_color?: string | null;
           accent_color?: string | null;
           whatsapp?: string | null;
+          status?: "UNVERIFIED" | "VERIFIED";
           created_at?: string;
           updated_at?: string;
         };
@@ -79,6 +81,7 @@ export interface Database {
           primary_color?: string | null;
           accent_color?: string | null;
           whatsapp?: string | null;
+          status?: "UNVERIFIED" | "VERIFIED";
           updated_at?: string;
         };
       };
