@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Fingerprint, LogOut } from "lucide-react";
-import Link from "next/link";
+import { AdminSidebar } from "@/components/modules/AdminSidebar";
 
 export default async function AdminLayout({
   children,
@@ -27,33 +26,24 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top Navbar */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-            <Fingerprint className="w-5 h-5 text-white" />
+    <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
+      <AdminSidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar for Admin (Optional, could just be a header or profile area) */}
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 shrink-0">
+          <h2 className="text-lg font-semibold text-gray-800">Admin Control Panel</h2>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold text-gray-600">
+              {profile?.full_name?.charAt(0) || "A"}
+            </div>
+            <span className="text-sm font-medium text-gray-700">{profile?.full_name || "Admin"}</span>
           </div>
-          <span className="font-bold text-lg text-gray-900 tracking-tight">Super Admin</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700">Hi, {profile.full_name}</span>
-          <form action="/auth/signout" method="post">
-            <button
-              type="submit"
-              className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
-          </form>
-        </div>
-      </nav>
+        </header>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
-        {children}
-      </main>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#fafafa] p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

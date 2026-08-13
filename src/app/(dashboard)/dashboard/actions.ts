@@ -15,19 +15,27 @@ export async function setupBoardingHouse(formData: FormData) {
         throw new Error("Unauthorized");
     }
 
+    const formattedSubdomain = subdomainInput ? subdomainInput.toLowerCase().replace(/\s+/g, '-') : name.toLowerCase().replace(/\s+/g, '-');
+
+    // Cek apakah subdomain sudah terpakai
+    const { data: existing } = await supabase.from("tenants").select("id").eq("subdomain", formattedSubdomain).single();
+    if (existing) {
+        throw new Error("Subdomain ini sudah digunakan, silakan pilih yang lain.");
+    }
+
     // Insert ke tabel tenants dengan status UNVERIFIED
     const { error } = await supabase.from("tenants").insert({
         owner_id: user.id,
         name: name,
         address: address,
         description: description,
-        subdomain: subdomainInput ? subdomainInput.toLowerCase().replace(/\s+/g, '-') : name.toLowerCase().replace(/\s+/g, '-'),
+        subdomain: formattedSubdomain,
         status: "UNVERIFIED",
     });
 
     if (error) {
-        console.error("Gagal membuat kos:", error.message);
-        throw new Error("Gagal menyimpan data kos.");
+        console.error("Gagal membuat kos:", error);
+        throw new Error(error.message || "Gagal menyimpan data kos.");
     }
 
     // Refresh halaman agar mendapatkan data terbaru
