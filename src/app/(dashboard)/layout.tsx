@@ -15,6 +15,17 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // Cek profile role, jika admin lempar ke admin dashboard
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role === "admin") {
+    redirect("/admin/dashboard");
+  }
+
   // Cek apakah user punya kos
   const { data: boardingHouse } = await supabase
     .from("tenants")
