@@ -30,19 +30,32 @@ export async function createRoom(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  // Get tenant ID
-  const { data: tenant } = await supabase
-    .from("tenants")
-    .select("id")
-    .eq("owner_id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  let tenantId = null;
 
-  if (!tenant) {
+  if (profile?.role === "staff") {
+    const { data: staffData } = await supabase
+      .from("tenant_staffs")
+      .select("tenant_id")
+      .eq("email", user.email)
+      .eq("status", "active")
+      .maybeSingle();
+    tenantId = staffData?.tenant_id;
+  } else {
+    const { data: tenantData } = await supabase
+      .from("tenants")
+      .select("id")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    tenantId = tenantData?.id;
+  }
+
+  if (!tenantId) {
     return { error: "Kos belum terdaftar." };
   }
 
   const { error } = await supabase.from("rooms").insert({
-    boarding_house_id: tenant.id,
+    boarding_house_id: tenantId,
     name,
     price,
     status,

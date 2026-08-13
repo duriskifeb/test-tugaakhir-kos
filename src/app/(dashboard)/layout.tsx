@@ -26,18 +26,40 @@ export default async function DashboardLayout({
     redirect("/admin/dashboard");
   }
 
-  // Cek apakah user punya kos
-  const { data: boardingHouse } = await supabase
-    .from("tenants")
-    .select("id, status")
-    .eq("owner_id", user.id)
-    .maybeSingle(); // maybeSingle instead of single so it doesn't throw if not found
+  // Cek apakah user punya kos (atau staff)
+  let boardingHouse = null;
+  let role = profile?.role || "tenant";
+
+  if (role === "staff") {
+    const { data: staffData } = await supabase
+      .from("tenant_staffs")
+      .select("tenant_id")
+      .eq("email", user.email)
+      .eq("status", "active")
+      .maybeSingle();
+      
+    if (staffData) {
+      const { data: tenantData } = await supabase
+        .from("tenants")
+        .select("id, status")
+        .eq("id", staffData.tenant_id)
+        .maybeSingle();
+      boardingHouse = tenantData;
+    }
+  } else {
+    const { data: tenantData } = await supabase
+      .from("tenants")
+      .select("id, status")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    boardingHouse = tenantData;
+  }
 
   const hasBoardingHouse = !!boardingHouse;
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-      <Sidebar hasBoardingHouse={hasBoardingHouse} />
+      <Sidebar hasBoardingHouse={hasBoardingHouse} role={role} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#fafafa]">

@@ -27,7 +27,7 @@ const mainNavItems = [
   { name: "Staff Management", href: "/dashboard/staff", icon: UserCog },
 ];
 
-export function Sidebar({ hasBoardingHouse = true }: { hasBoardingHouse?: boolean }) {
+export function Sidebar({ hasBoardingHouse = true, role = "tenant" }: { hasBoardingHouse?: boolean, role?: string }) {
   const pathname = usePathname();
 
   return (
@@ -41,6 +41,9 @@ export function Sidebar({ hasBoardingHouse = true }: { hasBoardingHouse?: boolea
       {/* Main Navigation */}
       <nav className="flex-1 px-3 space-y-1">
         {hasBoardingHouse && mainNavItems.map((item) => {
+          // Hide Staff Management for staff
+          if (role === "staff" && item.name === "Staff Management") return null;
+          
           const isActive = pathname === item.href;
           return (
             <Link
@@ -58,7 +61,7 @@ export function Sidebar({ hasBoardingHouse = true }: { hasBoardingHouse?: boolea
         })}
 
         {/* Website Builder Special Button */}
-        {hasBoardingHouse && (
+        {hasBoardingHouse && role !== "staff" && (
           <div className="pt-4 pb-2">
             <Link
               href="/dashboard/website-builder"
@@ -73,13 +76,15 @@ export function Sidebar({ hasBoardingHouse = true }: { hasBoardingHouse?: boolea
 
       {/* Footer Navigation */}
       <div className="p-3 mt-auto space-y-1">
-        <Link
-          href="/dashboard/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-        >
-          <Settings className="w-5 h-5 text-gray-500" />
-          Settings
-        </Link>
+        {role !== "staff" && (
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          >
+            <Settings className="w-5 h-5 text-gray-500" />
+            Settings
+          </Link>
+        )}
         <Link
           href="/dashboard/support"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"

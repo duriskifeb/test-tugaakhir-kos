@@ -12,14 +12,27 @@ export default async function RoomsPage() {
     redirect("/login");
   }
 
-  // Get tenant ID
-  const { data: tenant } = await supabase
-    .from("tenants")
-    .select("id")
-    .eq("owner_id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  let tenantId = null;
 
-  if (!tenant) {
+  if (profile?.role === "staff") {
+    const { data: staffData } = await supabase
+      .from("tenant_staffs")
+      .select("tenant_id")
+      .eq("email", user.email)
+      .eq("status", "active")
+      .maybeSingle();
+    tenantId = staffData?.tenant_id;
+  } else {
+    const { data: tenantData } = await supabase
+      .from("tenants")
+      .select("id")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    tenantId = tenantData?.id;
+  }
+
+  if (!tenantId) {
     redirect("/dashboard");
   }
 
@@ -27,7 +40,7 @@ export default async function RoomsPage() {
   const { data: rooms, error } = await supabase
     .from("rooms")
     .select("*")
-    .eq("boarding_house_id", tenant.id)
+    .eq("boarding_house_id", tenantId)
     .order("created_at", { ascending: false });
 
   if (error) {
