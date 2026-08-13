@@ -70,7 +70,7 @@ export default async function AdminDashboardOverview() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Ringkasan Sistem</h1>
         <p className="text-gray-500 mt-1">Pantau statistik pendaftaran dan stabilitas platform Anda.</p>

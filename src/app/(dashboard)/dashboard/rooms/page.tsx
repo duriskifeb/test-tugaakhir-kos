@@ -1,143 +1,168 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Plus, BedDouble, Trash2, Edit } from "lucide-react";
+import { deleteRoom } from "./actions";
 
-import { useState } from "react";
-import { Plus, Search, Filter, MoreVertical, Edit2, Trash2 } from "lucide-react";
+export default async function RoomsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-// Data statis untuk skeleton
-const mockRooms = [
-  { id: "1", number: "A-01", type: "VIP Room", price: 2500000, status: "Occupied", tenant: "Alex Johnson" },
-  { id: "2", number: "A-02", type: "VIP Room", price: 2500000, status: "Empty", tenant: null },
-  { id: "3", number: "B-01", type: "Standard", price: 1500000, status: "Occupied", tenant: "Sarah Parker" },
-  { id: "4", number: "B-02", type: "Standard", price: 1500000, status: "Empty", tenant: null },
-  { id: "5", number: "C-01", type: "Economy", price: 1000000, status: "Occupied", tenant: "Michael Chen" },
-];
+  if (!user) {
+    redirect("/login");
+  }
 
-export default function RoomsPage() {
-  const [filter, setFilter] = useState("All");
+  // Get tenant ID
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("id")
+    .eq("owner_id", user.id)
+    .single();
+
+  if (!tenant) {
+    redirect("/dashboard");
+  }
+
+  // Fetch rooms
+  const { data: rooms, error } = await supabase
+    .from("rooms")
+    .select("*")
+    .eq("boarding_house_id", tenant.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching rooms:", error);
+  }
+
+  // Helper untuk memformat harga
+  const formatRupiah = (number: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(number);
+  };
 
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Rooms Management</h1>
-          <p className="text-gray-500 mt-1">Manage your property&apos;s room inventory and availability.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Manajemen Kamar</h1>
+          <p className="text-gray-500 mt-1">Kelola daftar kamar, harga, dan ketersediaan.</p>
         </div>
-        <button className="bg-[#3b23c6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2a1796] transition-colors shadow-sm flex items-center gap-2 w-fit">
+        <Link
+          href="/dashboard/rooms/create"
+          className="bg-[#3b23c6] text-white rounded-xl px-5 py-2.5 font-bold text-sm hover:bg-[#2d1b99] transition-all flex items-center gap-2 shadow-sm"
+        >
           <Plus className="w-4 h-4" />
-          Add New Room
-        </button>
+          Tambah Kamar
+        </Link>
       </div>
 
-      {/* Filters & Search */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1 relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search room number or type..." 
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-[#3b23c6] focus:ring-1 focus:ring-[#3b23c6] outline-none transition-all"
-          />
-        </div>
-        <div className="flex gap-2">
-          {["All", "Empty", "Occupied"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                filter === f 
-                  ? "bg-[#ede9fe] text-[#3b23c6] border border-[#d8b4fe]" 
-                  : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-          <button className="px-4 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium">
-            <Filter className="w-4 h-4" />
-            More Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Table Section */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <th className="p-4 pl-6">Room Number</th>
-                <th className="p-4">Type</th>
-                <th className="p-4">Monthly Price</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Current Tenant</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
+          <table className="w-full text-left text-sm text-gray-600">
+            <thead className="bg-gray-50 border-b border-gray-100 text-gray-700">
+              <tr>
+                <th className="px-6 py-4 font-semibold">Info Kamar</th>
+                <th className="px-6 py-4 font-semibold">Harga (Per Bulan)</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold">Fasilitas</th>
+                <th className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {mockRooms
-                .filter(room => filter === "All" || room.status === filter)
-                .map((room) => (
-                <tr key={room.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="p-4 pl-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <span className="font-bold text-gray-900">{room.number}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-sm text-gray-600">{room.type}</td>
-                  <td className="p-4 text-sm font-medium text-gray-900">Rp {room.price.toLocaleString("id-ID")}</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                      room.status === "Occupied" 
-                        ? "bg-red-50 text-red-700 border-red-200" 
-                        : "bg-green-50 text-green-700 border-green-200"
-                    }`}>
-                      {room.status === "Occupied" ? "Terisi" : "Kosong"}
-                    </span>
-                  </td>
-                  <td className="p-4 text-sm text-gray-500">
-                    {room.tenant ? (
-                      <span className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
-                          {room.tenant.charAt(0)}
+              {rooms && rooms.length > 0 ? (
+                rooms.map((room) => (
+                  <tr key={room.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#f5f3ff] text-[#3b23c6] rounded-xl flex items-center justify-center shrink-0">
+                          <BedDouble className="w-5 h-5" />
                         </div>
-                        {room.tenant}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400 italic">No tenant</span>
-                    )}
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 text-gray-400 hover:text-[#3b23c6] hover:bg-[#ede9fe] rounded-md transition-colors" title="Edit">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Delete">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <div>
+                          <p className="font-bold text-gray-900">{room.name}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">ID: {room.id.substring(0, 8)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-bold text-gray-900">
+                      {formatRupiah(room.price)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {room.status === "available" && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700">
+                          Tersedia
+                        </span>
+                      )}
+                      {room.status === "occupied" && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700">
+                          Terisi
+                        </span>
+                      )}
+                      {room.status === "maintenance" && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700">
+                          Perbaikan
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {room.facilities && room.facilities.length > 0 ? (
+                          room.facilities.slice(0, 3).map((f: string, i: number) => (
+                            <span key={i} className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+                              {f}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                        {room.facilities && room.facilities.length > 3 && (
+                          <span className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+                            +{room.facilities.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <form action={deleteRoom}>
+                          <input type="hidden" name="id" value={room.id} />
+                          <button 
+                            type="submit"
+                            className="p-2 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                        <BedDouble className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Belum ada kamar</h3>
+                      <p className="text-sm text-gray-500 max-w-sm mb-6">Anda belum menambahkan kamar apa pun ke dalam katalog kos Anda.</p>
+                      <Link
+                        href="/dashboard/rooms/create"
+                        className="bg-white border border-gray-200 text-gray-700 rounded-xl px-5 py-2.5 font-bold text-sm hover:bg-gray-50 transition-all shadow-sm"
+                      >
+                        Tambah Kamar Pertama
+                      </Link>
                     </div>
-                    <button className="p-1.5 text-gray-400 hover:text-gray-900 rounded-md sm:hidden">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
-        </div>
-        
-        {/* Pagination Skeleton */}
-        <div className="p-4 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
-          <span>Showing 1 to 5 of 24 results</span>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">Previous</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">Next</button>
-          </div>
         </div>
       </div>
     </div>

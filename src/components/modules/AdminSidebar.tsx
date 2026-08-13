@@ -1,26 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
 import { 
   Fingerprint, 
   LayoutDashboard, 
   ShieldCheck, 
   Users, 
-  Activity,
-  LogOut 
+  Activity
 } from "lucide-react";
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   const navItems = [
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -76,16 +67,6 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Logout Area */}
-      <div className="p-4 border-t border-gray-100">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          Sign Out
-        </button>
-      </div>
     </aside>
   );
 }

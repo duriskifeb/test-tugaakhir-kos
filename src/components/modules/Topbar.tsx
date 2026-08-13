@@ -5,10 +5,26 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function Topbar() {
+export function Topbar({ isAdmin = false }: { isAdmin?: boolean }) {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [userProfile, setUserProfile] = useState<{name: string, email: string, initials: string} | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const name = user.user_metadata?.full_name || "Pemilik Kos";
+        const email = user.email || "";
+        // Ambil inisial (1-2 huruf pertama)
+        const initials = name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase();
+        setUserProfile({ name, email, initials });
+      }
+    }
+    loadUser();
+  }, []);
 
   // Menutup dropdown jika klik di luar
   useEffect(() => {
@@ -60,9 +76,11 @@ export function Topbar() {
         </span>
 
         {/* Upgrade Button */}
-        <button className="hidden sm:block bg-[#3b23c6] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1796] transition-colors shadow-sm">
-          Upgrade
-        </button>
+        {!isAdmin && (
+          <button className="hidden sm:block bg-[#3b23c6] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1796] transition-colors shadow-sm">
+            Upgrade
+          </button>
+        )}
 
         {/* Avatar Dropdown */}
         <div className="relative" ref={dropdownRef}>
@@ -71,7 +89,7 @@ export function Topbar() {
             className="relative w-9 h-9 rounded-full overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#3b23c6] focus:ring-offset-2 hover:border-gray-300 transition-colors"
           >
             <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm">
-              AL
+              {userProfile?.initials || "U"}
             </div>
           </button>
 
@@ -79,8 +97,8 @@ export function Topbar() {
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 animate-in fade-in slide-in-from-top-2">
               <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-semibold text-gray-900">Alex Johnson</p>
-                <p className="text-xs text-gray-500 truncate">alex@example.com</p>
+                <p className="text-sm font-semibold text-gray-900 truncate">{userProfile?.name || "Loading..."}</p>
+                <p className="text-xs text-gray-500 truncate">{userProfile?.email || ""}</p>
               </div>
               <div className="py-1">
                 <button 
