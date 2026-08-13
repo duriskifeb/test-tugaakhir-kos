@@ -15,8 +15,8 @@ export async function setupBoardingHouse(formData: FormData) {
         throw new Error("Unauthorized");
     }
 
-    // Insert ke tabel boarding_houses dengan status UNVERIFIED
-    const { error } = await supabase.from("boarding_houses").insert({
+    // Insert ke tabel tenants dengan status UNVERIFIED
+    const { error } = await supabase.from("tenants").insert({
         owner_id: user.id,
         name: name,
         address: address,

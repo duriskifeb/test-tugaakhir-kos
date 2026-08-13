@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   // Cek apakah user punya kos
   const { data: boardingHouse } = await supabase
-    .from("boarding_houses")
+    .from("tenants")
     .select("id, status")
     .eq("owner_id", user.id)
     .maybeSingle();

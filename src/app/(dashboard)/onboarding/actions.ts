@@ -14,8 +14,8 @@ export async function createTenant(formData: FormData) {
         redirect("/login");
     }
 
-    // Insert ke tabel boarding_houses
-    const { error } = await supabase.from("boarding_houses").insert({
+    // Insert ke tabel tenants
+    const { error } = await supabase.from("tenants").insert({
         owner_id: user.id,
         name: name,
         subdomain: subdomain.toLowerCase().replace(/\s+/g, '-'), // Membuat format subdomain (contoh: kos-melati)
