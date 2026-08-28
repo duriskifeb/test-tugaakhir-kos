@@ -15,7 +15,7 @@ export default async function PaymentsPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   
   if (profile?.role === "staff") {
-    const { data: staffData } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email).eq("status", "active").single();
+    const { data: staffData } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email ?? "").eq("status", "active").single();
     tenantId = staffData?.tenant_id;
   } else {
     const { data: tenantData } = await supabase.from("tenants").select("id").eq("owner_id", user.id).maybeSingle();

@@ -19,7 +19,7 @@ export default async function RoomsPage() {
     const { data: staffData } = await supabase
       .from("tenant_staffs")
       .select("tenant_id")
-      .eq("email", user.email)
+      .eq("email", user.email ?? "")
       .eq("status", "active")
       .maybeSingle();
     tenantId = staffData?.tenant_id;
@@ -121,19 +121,21 @@ export default async function RoomsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
-                        {room.facilities && room.facilities.length > 0 ? (
-                          room.facilities.slice(0, 3).map((f: string, i: number) => (
-                            <span key={i} className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
-                              {f}
-                            </span>
-                          ))
+                        {(room.facilities as string[] | null)?.length ? (
+                          <>
+                            {(room.facilities as string[]).slice(0, 3).map((f: string, i: number) => (
+                              <span key={i} className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+                                {f}
+                              </span>
+                            ))}
+                            {(room.facilities as string[]).length > 3 && (
+                              <span className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+                                +{(room.facilities as string[]).length - 3}
+                              </span>
+                            )}
+                          </>
                         ) : (
                           <span className="text-gray-400 text-xs">-</span>
-                        )}
-                        {room.facilities && room.facilities.length > 3 && (
-                          <span className="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
-                            +{room.facilities.length - 3}
-                          </span>
                         )}
                       </div>
                     </td>

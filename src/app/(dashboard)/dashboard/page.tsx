@@ -17,15 +17,15 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  let role = profile?.role || "tenant";
-  let boardingHouse = null;
+  const role = profile?.role || "owner";
+  let boardingHouse: { id: string; status: string } | null = null;
   let tenantId = null;
 
   if (role === "staff") {
     const { data: staffData } = await supabase
       .from("tenant_staffs")
       .select("tenant_id")
-      .eq("email", user.email)
+      .eq("email", user.email ?? "")
       .eq("status", "active")
       .maybeSingle();
       
@@ -36,7 +36,9 @@ export default async function DashboardPage() {
         .select("id, status")
         .eq("id", tenantId)
         .maybeSingle();
-      boardingHouse = tenantData;
+      if (tenantData) {
+        boardingHouse = { id: tenantData.id, status: tenantData.status ?? "UNVERIFIED" };
+      }
     }
   } else {
     const { data: tenantData } = await supabase
@@ -44,14 +46,16 @@ export default async function DashboardPage() {
       .select("id, status")
       .eq("owner_id", user.id)
       .maybeSingle();
-    boardingHouse = tenantData;
-    if (tenantData) tenantId = tenantData.id;
+    if (tenantData) {
+      boardingHouse = { id: tenantData.id, status: tenantData.status ?? "UNVERIFIED" };
+      tenantId = tenantData.id;
+    }
   }
 
   const userName = user.user_metadata?.full_name?.split(" ")[0] || "Owner";
 
   // Fetch metrics if boarding house exists
-  let metrics = {
+  const metrics = {
     occupancyRate: 0,
     monthlyRevenue: 0,
     availableRooms: 0,

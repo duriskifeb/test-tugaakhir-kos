@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { Json } from "@/types/database.types";
 
 export async function createRoom(formData: FormData) {
   const supabase = await createClient();
@@ -37,7 +38,7 @@ export async function createRoom(formData: FormData) {
     const { data: staffData } = await supabase
       .from("tenant_staffs")
       .select("tenant_id")
-      .eq("email", user.email)
+      .eq("email", user.email ?? "")
       .eq("status", "active")
       .maybeSingle();
     tenantId = staffData?.tenant_id;
@@ -58,8 +59,8 @@ export async function createRoom(formData: FormData) {
     boarding_house_id: tenantId,
     name,
     price,
-    status,
-    facilities,
+    status: (status || "available") as "available" | "occupied" | "maintenance",
+    facilities: facilities as unknown as Json,
   });
 
   if (error) {
@@ -75,14 +76,15 @@ export async function deleteRoom(formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
 
-  if (!id) return { error: "ID kamar tidak valid." };
+  if (!id) throw new Error("ID kamar tidak valid.");
 
   const { error } = await supabase.from("rooms").delete().eq("id", id);
   
   if (error) {
     console.error("Gagal menghapus kamar:", error);
-    return { error: "Terjadi kesalahan saat menghapus kamar." };
+    throw new Error("Terjadi kesalahan saat menghapus kamar.");
   }
 
   revalidatePath("/dashboard/rooms");
+  redirect("/dashboard/rooms");
 }

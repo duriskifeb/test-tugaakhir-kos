@@ -44,7 +44,9 @@ export default async function PublicTenantPage(props: {
   }
 
   // 2. Ambil tema
-  const theme = tenant.theme || { primaryColor: "#3b23c6", fontFamily: "Inter" };
+  const theme: { primaryColor: string; fontFamily: string } =
+    (tenant.theme as { primaryColor: string; fontFamily: string } | null) ??
+    { primaryColor: "#3b23c6", fontFamily: "Inter" };
 
   // 3. Ambil seksi halaman (page sections)
   const { data: sections } = await supabase
@@ -54,8 +56,14 @@ export default async function PublicTenantPage(props: {
     .order("order_index", { ascending: true });
 
   // Parsing seksi
-  const heroSection = sections?.find((s) => s.section_type === "hero")?.content || defaultContent.hero;
-  const featuresSection = sections?.find((s) => s.section_type === "features")?.content || defaultContent.features;
+  const heroSection: { title: string; subtitle: string; ctaText: string } =
+    sections?.find((s) => s.section_type === "hero")?.content as
+      | { title: string; subtitle: string; ctaText: string }
+      | null ?? defaultContent.hero;
+  const featuresSection: { title: string; items: { icon: string; text: string }[] } =
+    sections?.find((s) => s.section_type === "features")?.content as
+      | { title: string; items: { icon: string; text: string }[] }
+      | null ?? defaultContent.features;
 
   // 4. Ambil data kamar aktif
   const { data: rooms } = await supabase
@@ -163,14 +171,14 @@ export default async function PublicTenantPage(props: {
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{room.name}</h3>
                     
                     <div className="flex flex-wrap gap-2 mb-6 mt-2">
-                      {room.facilities?.slice(0, 4).map((f: string, i: number) => (
+                      {(room.facilities as string[] | null)?.slice(0, 4).map((f: string, i: number) => (
                         <span key={i} className="bg-gray-50 border border-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs font-medium">
                           {f}
                         </span>
                       ))}
-                      {room.facilities?.length > 4 && (
+                      {((room.facilities as string[] | null)?.length ?? 0) > 4 && (
                         <span className="bg-gray-50 border border-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs font-medium">
-                          +{room.facilities.length - 4}
+                          +{(room.facilities as string[]).length - 4}
                         </span>
                       )}
                     </div>

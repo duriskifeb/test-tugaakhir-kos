@@ -34,7 +34,7 @@ export default async function DashboardLayout({
   const { data: staffData } = await supabase
     .from("tenant_staffs")
     .select("tenant_id, status")
-    .eq("email", user.email)
+    .eq("email", user.email ?? "")
     .maybeSingle();
 
   // Auto-correct role if they are actually staff

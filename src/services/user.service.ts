@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database.types";
 import type { Profile, ServiceResult } from "@/types";
 
 /**
@@ -42,11 +43,14 @@ export async function getUserProfile(userId: string): Promise<ServiceResult<Prof
  */
 export async function updateUserProfile(
   userId: string,
-  updates: Partial<Pick<Profile, "full_name" | "phone" | "avatar_url">>
+  updates: Partial<Pick<Profile, "full_name" | "phone" | "email">>
 ): Promise<ServiceResult<Profile>> {
   const supabase = await createClient();
 
-  const payload = { ...updates, updated_at: new Date().toISOString() } as never;
+  const payload = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  } satisfies Partial<Database["public"]["Tables"]["profiles"]["Update"]>;
 
   const { data, error } = await supabase
     .from("profiles")

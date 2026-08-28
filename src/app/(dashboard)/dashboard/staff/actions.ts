@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function addStaff(formData: FormData) {
   const supabase = await createClient();
@@ -49,14 +50,15 @@ export async function removeStaff(formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
 
-  if (!id) return { error: "ID staf tidak valid." };
+  if (!id) throw new Error("ID staf tidak valid.");
 
   const { error } = await supabase.from("tenant_staffs").delete().eq("id", id);
   
   if (error) {
     console.error("Gagal menghapus staf:", error);
-    return { error: "Terjadi kesalahan saat menghapus staf." };
+    throw new Error("Terjadi kesalahan saat menghapus staf.");
   }
 
   revalidatePath("/dashboard/staff");
+  redirect("/dashboard/staff");
 }

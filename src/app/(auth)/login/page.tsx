@@ -63,7 +63,7 @@ export default function LoginPage() {
             .eq("email", email)
             .maybeSingle();
             
-          const userRole = staffCheck ? "staff" : "tenant";
+          const userRole = staffCheck ? "staff" : "owner";
 
           await supabase.from("profiles").upsert({
             id: signUpData.user.id,

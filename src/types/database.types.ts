@@ -1,166 +1,493 @@
-/**
- * Database Types - Auto-generated dari Supabase CLI
- *
- * Cara generate otomatis:
- * npx supabase gen types typescript --project-id <your-project-id> > src/types/database.types.ts
- *
- * File ini adalah placeholder yang mendefinisikan struktur database saat ini.
- * Update sesuai dengan schema Supabase kamu.
- */
-
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
+      maintenance_requests: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          reported_by: string
+          room_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          reported_by: string
+          room_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          reported_by?: string
+          room_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          section_type: string
+          tenant_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index: number
+          section_type: string
+          tenant_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          section_type?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_sections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          paid_at: string | null
+          renter_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          paid_at?: string | null
+          renter_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          paid_at?: string | null
+          renter_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_renter_id_fkey"
+            columns: ["renter_id"]
+            isOneToOne: false
+            referencedRelation: "renters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
-          id: string;
-          full_name: string | null;
-          phone: string | null;
-          avatar_url: string | null;
-          role: "admin" | "owner" | "staff" | "renter";
-          email: string | null;
-          created_at: string;
-          updated_at: string;
-        };
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_suspended: boolean | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+        }
         Insert: {
-          id: string;
-          full_name?: string | null;
-          phone?: string | null;
-          avatar_url?: string | null;
-          role?: "admin" | "owner" | "staff" | "renter";
-          email?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          is_suspended?: boolean | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          full_name?: string | null;
-          phone?: string | null;
-          avatar_url?: string | null;
-          role?: "admin" | "owner" | "staff" | "renter";
-          email?: string | null;
-          updated_at?: string;
-        };
-      };
-      boarding_houses: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_suspended?: boolean | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      renters: {
         Row: {
-          id: string;
-          owner_id: string;
-          name: string;
-          description: string | null;
-          address: string | null;
-          subdomain: string | null;
-          primary_color: string | null;
-          accent_color: string | null;
-          whatsapp: string | null;
-          status: "UNVERIFIED" | "VERIFIED";
-          created_at: string;
-          updated_at: string;
-        };
+          check_in_date: string
+          created_at: string
+          full_name: string
+          id: string
+          phone_number: string | null
+          room_id: string | null
+          status: string
+          tenant_id: string
+        }
         Insert: {
-          id?: string;
-          owner_id: string;
-          name: string;
-          description?: string | null;
-          address?: string | null;
-          subdomain?: string | null;
-          primary_color?: string | null;
-          accent_color?: string | null;
-          whatsapp?: string | null;
-          status?: "UNVERIFIED" | "VERIFIED";
-          created_at?: string;
-          updated_at?: string;
-        };
+          check_in_date: string
+          created_at?: string
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          room_id?: string | null
+          status?: string
+          tenant_id: string
+        }
         Update: {
-          name?: string;
-          description?: string | null;
-          address?: string | null;
-          subdomain?: string | null;
-          primary_color?: string | null;
-          accent_color?: string | null;
-          whatsapp?: string | null;
-          status?: "UNVERIFIED" | "VERIFIED";
-          updated_at?: string;
-        };
-      };
+          check_in_date?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          room_id?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renters_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renters_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
-          id: string;
-          boarding_house_id: string;
-          number: string;
-          type: "VIP" | "Standard" | "Economy";
-          price_per_month: number;
-          status: "empty" | "occupied" | "maintenance";
-          description: string | null;
-          created_at: string;
-          updated_at: string;
-        };
+          boarding_house_id: string
+          created_at: string
+          facilities: Json | null
+          id: string
+          name: string
+          price: number
+          status: Database["public"]["Enums"]["room_status"]
+        }
         Insert: {
-          id?: string;
-          boarding_house_id: string;
-          number: string;
-          type: "VIP" | "Standard" | "Economy";
-          price_per_month: number;
-          status?: "empty" | "occupied" | "maintenance";
-          description?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          boarding_house_id: string
+          created_at?: string
+          facilities?: Json | null
+          id?: string
+          name: string
+          price: number
+          status?: Database["public"]["Enums"]["room_status"]
+        }
         Update: {
-          number?: string;
-          type?: "VIP" | "Standard" | "Economy";
-          price_per_month?: number;
-          status?: "empty" | "occupied" | "maintenance";
-          description?: string | null;
-          updated_at?: string;
-        };
-      };
+          boarding_house_id?: string
+          created_at?: string
+          facilities?: Json | null
+          id?: string
+          name?: string
+          price?: number
+          status?: Database["public"]["Enums"]["room_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_boarding_house_id_fkey"
+            columns: ["boarding_house_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_staffs: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_staffs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
-          id: string;
-          room_id: string;
-          full_name: string;
-          email: string | null;
-          phone: string | null;
-          check_in_date: string;
-          check_out_date: string | null;
-          created_at: string;
-        };
+          address: string | null
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string
+          plan: string
+          status: string | null
+          subdomain: string | null
+          theme: Json
+        }
         Insert: {
-          id?: string;
-          room_id: string;
-          full_name: string;
-          email?: string | null;
-          phone?: string | null;
-          check_in_date: string;
-          check_out_date?: string | null;
-          created_at?: string;
-        };
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          plan?: string
+          status?: string | null
+          subdomain?: string | null
+          theme?: Json
+        }
         Update: {
-          full_name?: string;
-          email?: string | null;
-          phone?: string | null;
-          check_out_date?: string | null;
-        };
-      };
-    };
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          plan?: string
+          status?: string | null
+          subdomain?: string | null
+          theme?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      is_admin: { Args: never; Returns: boolean }
+    }
     Enums: {
-      room_type: "VIP" | "Standard" | "Economy";
-      room_status: "empty" | "occupied" | "maintenance";
-    };
-  };
+      room_status: "available" | "occupied" | "maintenance"
+      user_role: "admin" | "owner" | "staff" | "renter"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      room_status: ["available", "occupied", "maintenance"],
+      user_role: ["admin", "owner", "staff", "renter"],
+    },
+  },
+} as const

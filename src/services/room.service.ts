@@ -12,7 +12,7 @@ export async function getRooms(boardingHouseId: string): Promise<ServiceResult<R
     .from("rooms")
     .select(`*, tenant:tenants(*)`)
     .eq("boarding_house_id", boardingHouseId)
-    .order("number")
+    .order("created_at", { ascending: false })
     .returns<RoomWithTenant[]>();
 
   if (error) return { data: null, error: error.message };
@@ -110,7 +110,7 @@ export async function getRoomStats(boardingHouseId: string) {
 
   const total = data.length;
   const occupied = data.filter((r) => r.status === "occupied").length;
-  const empty = data.filter((r) => r.status === "empty").length;
+  const empty = data.filter((r) => r.status === "available").length;
   const maintenance = data.filter((r) => r.status === "maintenance").length;
 
   return {

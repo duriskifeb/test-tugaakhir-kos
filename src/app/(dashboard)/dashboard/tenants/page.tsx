@@ -15,7 +15,7 @@ export default async function TenantsPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   
   if (profile?.role === "staff") {
-    const { data: staffData } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email).eq("status", "active").single();
+    const { data: staffData } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email ?? "").eq("status", "active").single();
     tenantId = staffData?.tenant_id;
   } else {
     const { data: tenantData } = await supabase.from("tenants").select("id").eq("owner_id", user.id).maybeSingle();
@@ -129,7 +129,7 @@ export default async function TenantsPage() {
                     {renter.status === "active" && (
                       <form action={removeTenant}>
                         <input type="hidden" name="id" value={renter.id} />
-                        <input type="hidden" name="roomId" value={renter.room_id} />
+                        <input type="hidden" name="roomId" value={renter.room_id ?? ""} />
                         <button 
                           title="Tandai Pindah Keluar"
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 text-sm font-semibold"
