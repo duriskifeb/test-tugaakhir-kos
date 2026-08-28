@@ -27,18 +27,26 @@ export default async function DashboardLayout({
   }
 
   // Cek apakah user punya kos (atau staff)
-  let boardingHouse = null;
   let role = profile?.role || "tenant";
+  let boardingHouse = null;
+
+  // Check if they have a staff invite (requires RLS policy to allow reading their own email)
+  const { data: staffData } = await supabase
+    .from("tenant_staffs")
+    .select("tenant_id, status")
+    .eq("email", user.email)
+    .maybeSingle();
+
+  // Auto-correct role if they are actually staff
+  if (staffData && role !== "staff") {
+    role = "staff";
+    if (staffData.status === "pending") {
+      staffData.status = "active";
+    }
+  }
 
   if (role === "staff") {
-    const { data: staffData } = await supabase
-      .from("tenant_staffs")
-      .select("tenant_id")
-      .eq("email", user.email)
-      .eq("status", "active")
-      .maybeSingle();
-      
-    if (staffData) {
+    if (staffData && staffData.status === "active") {
       const { data: tenantData } = await supabase
         .from("tenants")
         .select("id, status")

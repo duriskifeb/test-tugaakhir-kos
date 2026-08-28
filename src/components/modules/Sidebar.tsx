@@ -78,15 +78,13 @@ export function Sidebar({ hasBoardingHouse = true, role = "tenant" }: { hasBoard
 
       {/* Footer Navigation */}
       <div className="p-3 mt-auto space-y-1">
-        {role !== "staff" && (
-          <Link
-            href="/dashboard/settings"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <Settings className="w-5 h-5 text-gray-500" />
-            Settings
-          </Link>
-        )}
+        <Link
+          href="/dashboard/settings"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+        >
+          <Settings className="w-5 h-5 text-gray-500" />
+          Settings
+        </Link>
         <Link
           href="/dashboard/support"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"

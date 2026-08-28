@@ -56,12 +56,29 @@ export default function LoginPage() {
         
         // Manual insert ke tabel profiles karena trigger sudah dihapus
         if (signUpData.user) {
+          // Check if user is invited as staff
+          const { data: staffCheck } = await supabase
+            .from("tenant_staffs")
+            .select("id")
+            .eq("email", email)
+            .maybeSingle();
+            
+          const userRole = staffCheck ? "staff" : "tenant";
+
           await supabase.from("profiles").upsert({
             id: signUpData.user.id,
             full_name: fullName,
             phone: phone,
+            role: userRole,
             updated_at: new Date().toISOString()
           });
+
+          // Activate staff status if they were invited
+          if (staffCheck) {
+            await supabase.from("tenant_staffs")
+              .update({ status: "active" })
+              .eq("email", email);
+          }
         }
 
         setMessage(

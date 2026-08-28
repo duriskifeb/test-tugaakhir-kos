@@ -16,15 +16,31 @@ import { OnboardingWizard } from "@/components/modules/OnboardingWizard";
 
 export function DashboardClient({ 
   boardingHouse,
-  userName 
+  userName,
+  role = "tenant"
 }: { 
   boardingHouse: { id: string; status: string } | null;
   userName: string;
+  role?: string;
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // Jika Belum Punya Kos (Fase 2)
   if (!boardingHouse) {
+    if (role === "staff") {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] p-6 text-center animate-in fade-in zoom-in duration-500">
+          <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+            <UserPlus className="w-10 h-10 text-[#3b23c6]" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">Selamat Datang, staff baru!</h1>
+          <p className="text-gray-500 max-w-md mb-8 text-base">
+            Akun Anda belum ditugaskan untuk mengelola properti kos manapun. Silakan hubungi Pemilik Kos untuk menambahkan Anda ke dalam sistem mereka.
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] p-6 text-center animate-in fade-in zoom-in duration-500">
         <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
