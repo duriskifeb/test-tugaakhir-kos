@@ -17,11 +17,20 @@ import { OnboardingWizard } from "@/components/modules/OnboardingWizard";
 export function DashboardClient({ 
   boardingHouse,
   userName,
-  role = "tenant"
+  role = "tenant",
+  metrics
 }: { 
   boardingHouse: { id: string; status: string } | null;
   userName: string;
   role?: string;
+  metrics?: {
+    occupancyRate: number;
+    monthlyRevenue: number;
+    availableRooms: number;
+    totalRooms: number;
+    pendingBookings: number;
+    newTenants: number;
+  };
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
@@ -105,22 +114,18 @@ export function DashboardClient({
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <h3 className="text-xs font-semibold text-gray-500 mb-1">Occupancy Rate</h3>
           <div className="flex items-end gap-2">
-            <span className="text-2xl font-bold text-[#3b23c6]">92%</span>
-            <span className="flex items-center text-xs font-semibold text-green-600 mb-1">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> 2.4%
-            </span>
+            <span className="text-2xl font-bold text-[#3b23c6]">{metrics?.occupancyRate || 0}%</span>
           </div>
           <div className="w-full bg-gray-100 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div className="bg-[#3b23c6] w-[92%] h-full rounded-full" />
+            <div className="bg-[#3b23c6] h-full rounded-full transition-all duration-1000" style={{ width: `${metrics?.occupancyRate || 0}%` }} />
           </div>
         </div>
 
         {/* Metric 2 */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <h3 className="text-xs font-semibold text-gray-500 mb-1">Monthly Revenue</h3>
-          <span className="text-2xl font-bold text-gray-900">$12,400</span>
-          <span className="flex items-center text-xs font-medium text-green-600 mt-2">
-            <ArrowUpRight className="w-3 h-3 mr-0.5" /> +$1.2k vs last month
+          <span className="text-2xl font-bold text-gray-900">
+            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(metrics?.monthlyRevenue || 0)}
           </span>
         </div>
 
@@ -128,16 +133,15 @@ export function DashboardClient({
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <h3 className="text-xs font-semibold text-gray-500 mb-1">Available Rooms</h3>
           <div className="flex items-end gap-1">
-            <span className="text-2xl font-bold text-gray-900">8</span>
-            <span className="text-xs text-gray-500 mb-1">/ 120 total</span>
+            <span className="text-2xl font-bold text-gray-900">{metrics?.availableRooms || 0}</span>
+            <span className="text-xs text-gray-500 mb-1">/ {metrics?.totalRooms || 0} total</span>
           </div>
-          <span className="text-xs text-gray-500 mt-2">Avg. time to fill: 4 days</span>
         </div>
 
         {/* Metric 4 (Highlighted) */}
         <div className="bg-[#f5f3ff] border border-[#d8b4fe] rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <h3 className="text-xs font-bold text-[#3b23c6] mb-1">Pending Bookings</h3>
-          <span className="text-2xl font-bold text-gray-900">15</span>
+          <span className="text-2xl font-bold text-gray-900">{metrics?.pendingBookings || 0}</span>
           <button className="flex items-center text-xs font-bold text-[#3b23c6] hover:underline mt-2">
             Review all <ArrowRight className="w-3 h-3 ml-1" />
           </button>
@@ -145,22 +149,17 @@ export function DashboardClient({
 
         {/* Metric 5 */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <h3 className="text-xs font-semibold text-gray-500 mb-1">New Tenants</h3>
-          <span className="text-2xl font-bold text-gray-900">12</span>
-          <div className="flex items-center mt-2">
-            <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white z-10" />
-            <div className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white -ml-2 z-20" />
-            <div className="w-6 h-6 rounded-full bg-[#3b23c6] border-2 border-white -ml-2 z-30 flex items-center justify-center text-[8px] font-bold text-white">
-              +9
-            </div>
-          </div>
+          <h3 className="text-xs font-semibold text-gray-500 mb-1">Active Tenants</h3>
+          <span className="text-2xl font-bold text-gray-900">{metrics?.newTenants || 0}</span>
         </div>
 
         {/* Metric 6 */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <h3 className="text-xs font-semibold text-gray-500 mb-1">Profit (Net)</h3>
-          <span className="text-2xl font-bold text-gray-900">$8,200</span>
-          <span className="text-xs text-gray-500 mt-2">66.1% Margin</span>
+          <span className="text-2xl font-bold text-gray-900">
+            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format((metrics?.monthlyRevenue || 0) * 0.85)}
+          </span>
+          <span className="text-xs text-gray-500 mt-2">Est. 85% Margin</span>
         </div>
       </div>
 

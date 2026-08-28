@@ -19,32 +19,22 @@ export default async function DashboardPage() {
 
   let role = profile?.role || "tenant";
   let boardingHouse = null;
-
-  // Check if they have a staff invite (this requires RLS policy to allow reading their own email)
-  const { data: staffData } = await supabase
-    .from("tenant_staffs")
-    .select("tenant_id, status")
-    .eq("email", user.email)
-    .maybeSingle();
-
-  // Auto-correct role if they are actually staff
-  if (staffData && role !== "staff") {
-    role = "staff";
-    // Optional: silently update their profile role to fix it for the future
-    await supabase.from("profiles").update({ role: "staff" }).eq("id", user.id);
-    // Also activate them if they are pending
-    if (staffData.status === "pending") {
-      await supabase.from("tenant_staffs").update({ status: "active" }).eq("email", user.email);
-      staffData.status = "active";
-    }
-  }
+  let tenantId = null;
 
   if (role === "staff") {
-    if (staffData && staffData.status === "active") {
+    const { data: staffData } = await supabase
+      .from("tenant_staffs")
+      .select("tenant_id")
+      .eq("email", user.email)
+      .eq("status", "active")
+      .maybeSingle();
+      
+    if (staffData) {
+      tenantId = staffData.tenant_id;
       const { data: tenantData } = await supabase
         .from("tenants")
         .select("id, status")
-        .eq("id", staffData.tenant_id)
+        .eq("id", tenantId)
         .maybeSingle();
       boardingHouse = tenantData;
     }
@@ -55,13 +45,68 @@ export default async function DashboardPage() {
       .eq("owner_id", user.id)
       .maybeSingle();
     boardingHouse = tenantData;
+    if (tenantData) tenantId = tenantData.id;
+  }
+
+  const userName = user.user_metadata?.full_name?.split(" ")[0] || "Owner";
+
+  // Fetch metrics if boarding house exists
+  let metrics = {
+    occupancyRate: 0,
+    monthlyRevenue: 0,
+    availableRooms: 0,
+    totalRooms: 0,
+    pendingBookings: 0,
+    newTenants: 0
+  };
+
+  if (tenantId) {
+    // 1. Rooms data (total and available)
+    const { data: rooms } = await supabase
+      .from("rooms")
+      .select("status")
+      .eq("boarding_house_id", tenantId);
+    
+    if (rooms) {
+      metrics.totalRooms = rooms.length;
+      metrics.availableRooms = rooms.filter(r => r.status === 'available').length;
+      const occupiedRooms = rooms.filter(r => r.status === 'occupied').length;
+      metrics.occupancyRate = metrics.totalRooms > 0 
+        ? Math.round((occupiedRooms / metrics.totalRooms) * 100) 
+        : 0;
+    }
+
+    // 2. Payments data (Monthly revenue - assuming paid this month)
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0,0,0,0);
+    
+    const { data: payments } = await supabase
+      .from("payments")
+      .select("amount")
+      .eq("tenant_id", tenantId)
+      .eq("status", "paid")
+      .gte("paid_at", startOfMonth.toISOString());
+    
+    if (payments) {
+      metrics.monthlyRevenue = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+    }
+
+    // 3. Active Tenants
+    const { count: newTenantsCount } = await supabase
+      .from("renters")
+      .select("*", { count: 'exact', head: true })
+      .eq("tenant_id", tenantId)
+      .eq("status", "active");
+    metrics.newTenants = newTenantsCount || 0;
   }
 
   return (
     <DashboardClient 
       boardingHouse={boardingHouse} 
-      userName={user.user_metadata?.full_name || "User"} 
+      userName={userName} 
       role={role}
+      metrics={metrics}
     />
   );
 }
