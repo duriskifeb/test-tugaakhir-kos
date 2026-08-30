@@ -15,14 +15,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
 
-  // Feedback states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -53,16 +51,14 @@ export default function LoginPage() {
         });
 
         if (signUpError) throw signUpError;
-        
-        // Manual insert ke tabel profiles karena trigger sudah dihapus
+
         if (signUpData.user) {
-          // Check if user is invited as staff
           const { data: staffCheck } = await supabase
             .from("tenant_staffs")
             .select("id")
             .eq("email", email)
             .maybeSingle();
-            
+
           const userRole = staffCheck ? "staff" : "owner";
 
           await supabase.from("profiles").upsert({
@@ -73,7 +69,6 @@ export default function LoginPage() {
             updated_at: new Date().toISOString()
           });
 
-          // Activate staff status if they were invited
           if (staffCheck) {
             await supabase.from("tenant_staffs")
               .update({ status: "active" })
@@ -92,19 +87,18 @@ export default function LoginPage() {
         });
 
         if (signInError) throw signInError;
-        
-        // Cek role user untuk redirect
+
         let redirectUrl = "/dashboard";
         if (signInData.user) {
-           const { data: profile } = await supabase
-             .from("profiles")
-             .select("role")
-             .eq("id", signInData.user.id)
-             .single();
-           
-           if (profile?.role === "admin") {
-             redirectUrl = "/admin/dashboard";
-           }
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", signInData.user.id)
+            .single();
+
+          if (profile?.role === "admin") {
+            redirectUrl = "/admin/dashboard";
+          }
         }
 
         setMessage("Login berhasil! Mengalihkan ke dashboard...");
@@ -115,24 +109,22 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error("Login/Register error full object:", err);
       let errorMsg = "Terjadi kesalahan yang tidak terduga.";
-      
+
       if (err?.message) {
         errorMsg = err.message;
       } else if (typeof err === "string") {
         errorMsg = err;
       } else if (err && typeof err === "object") {
         try {
-          // Coba ambil properti yang mungkin ada di error Supabase
           const keys = Object.keys(err);
           errorMsg = keys.length ? JSON.stringify(err) : String(err);
-          
           if (err.name) errorMsg = `${err.name}: ${errorMsg}`;
           if (err.status) errorMsg = `Status ${err.status}: ${errorMsg}`;
         } catch (e) {
           errorMsg = "Gagal memproses detail error.";
         }
       }
-      
+
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -156,266 +148,198 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Kolom Kiri - Visuals & Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-black overflow-hidden m-4 rounded-[2rem]">
+      {/* Panel Kiri - Ilustrasi */}
+      <div
+        className="hidden lg:flex lg:w-[45%] relative overflow-hidden m-5 rounded-3xl"
+        style={{ background: "linear-gradient(135deg, #c8b6e2 0%, #a78fd4 40%, #9b72cf 70%, #b89ce0 100%)" }}
+      >
+        <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
+          <Fingerprint className="w-4 h-4 text-white/80" />
+          <span className="text-white/80 text-xs font-semibold tracking-wide">Pintu Berkah</span>
+        </div>
+
         <Image
-          src="/auth_bg_fluid.png"
-          alt="Fluid Art Background"
+          src="/auth_illustration.jpg"
+          alt="Login Illustration"
           fill
-          sizes="50vw"
-          className="object-cover opacity-90"
+          sizes="45vw"
+          className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
-        <div className="absolute top-12 left-12 flex items-center gap-4">
-          <span className="text-white text-xs font-bold tracking-widest uppercase">
-            A Wise Quote
-          </span>
-          <div className="h-[1px] w-12 bg-white/50" />
-        </div>
-        <div className="absolute bottom-16 left-12 right-12">
-          <h1
-            className={`${playfair.className} text-6xl font-bold text-white mb-6 leading-[1.1]`}
-          >
-            Get
-            <br />
-            Everything
-            <br />
-            You Want
-          </h1>
-          <p className="text-gray-300 text-sm max-w-md leading-relaxed font-light">
-            You can get everything you want if you work hard,
-            <br />
-            trust the process, and stick to the plan.
-          </p>
-        </div>
+
+        <div
+          className="absolute bottom-0 left-0 right-0 h-24"
+          style={{ background: "linear-gradient(to top, rgba(167,143,212,0.5), transparent)" }}
+        />
       </div>
 
-      {/* Kolom Kanan - Form Login/Register */}
-      <div className="flex-1 flex flex-col pt-12 pb-8 px-8 sm:px-16 lg:px-24 relative overflow-y-auto">
-        <div className="w-full max-w-[380px] mx-auto flex flex-col min-h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-center gap-2 mb-12">
-            <Fingerprint className="w-5 h-5 text-black" />
-            <span className="text-lg font-bold text-black tracking-tight">
-              Pintu Berkah
-            </span>
-          </div>
+      {/* Panel Kanan - Form */}
+      <div className="flex-1 flex flex-col justify-center items-center px-8 sm:px-16 py-12 relative overflow-y-auto">
+        {/* Link atas kanan */}
+        <div className="absolute top-6 right-8 text-sm text-gray-500">
+          {view === "sign_in" ? (
+            <>
+              Not a member?{" "}
+              <button
+                onClick={() => setView("sign_up")}
+                className="font-semibold text-[#e05c5c] hover:underline"
+              >
+                Register now
+              </button>
+            </>
+          ) : (
+            <>
+              Already a member?{" "}
+              <button
+                onClick={() => setView("sign_in")}
+                className="font-semibold text-[#e05c5c] hover:underline"
+              >
+                Sign In
+              </button>
+            </>
+          )}
+        </div>
 
+        <div className="w-full max-w-[360px]">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h2
-              className={`${playfair.className} text-4xl font-semibold text-gray-900 mb-3`}
-            >
-              {view === "sign_in" ? "Welcome Back" : "Create Account"}
+          <div className="mb-8">
+            <h2 className={`${playfair.className} text-4xl font-bold text-gray-900 mb-2`}>
+              {view === "sign_in" ? "Hello Again!" : "Create Account"}
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-400 text-sm">
               {view === "sign_in"
-                ? "Enter your email and password to access your account"
+                ? "Welcome back you've been missed!"
                 : "Register as a property owner to manage your boarding house"}
             </p>
           </div>
 
-          {/* Custom Form */}
-          <div className="flex-1 w-full">
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              {view === "sign_up" && (
-                <>
-                  {/* Nama Lengkap Input */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1.5">
-                      Nama Lengkap
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Masukkan nama lengkap"
-                      className="w-full bg-[#f8f9fa] border-none rounded-xl px-4 py-3.5 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all placeholder:text-gray-400"
-                    />
-                  </div>
-
-                  {/* No Telepon Input */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1.5">
-                      No Telepon
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="Masukkan no telpon aktif"
-                      className="w-full bg-[#f8f9fa] border-none rounded-xl px-4 py-3.5 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all placeholder:text-gray-400"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Email Input */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-1.5">
-                  Email
-                </label>
+          {/* Form */}
+          <form className="flex flex-col gap-3.5" onSubmit={handleSubmit}>
+            {view === "sign_up" && (
+              <>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full bg-[#f8f9fa] border-none rounded-xl px-4 py-3.5 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all placeholder:text-gray-400"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter full name"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-700 focus:outline-none focus:border-[#c8b6e2] focus:ring-2 focus:ring-[#c8b6e2]/20 transition-all placeholder:text-gray-400 bg-white"
                 />
-              </div>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter phone number"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-700 focus:outline-none focus:border-[#c8b6e2] focus:ring-2 focus:ring-[#c8b6e2]/20 transition-all placeholder:text-gray-400 bg-white"
+                />
+              </>
+            )}
 
-              {/* Password Input */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-1.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full bg-[#f8f9fa] border-none rounded-xl pl-4 pr-12 py-3.5 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all placeholder:text-gray-400"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter username"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-700 focus:outline-none focus:border-[#c8b6e2] focus:ring-2 focus:ring-[#c8b6e2]/20 transition-all placeholder:text-gray-400 bg-white"
+            />
 
-              {view === "sign_up" && (
-                /* Konfirmasi Password Input */
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-1.5">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Ulangi password"
-                      className="w-full bg-[#f8f9fa] border-none rounded-xl pl-4 pr-12 py-3.5 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all placeholder:text-gray-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full border border-gray-200 rounded-xl pl-4 pr-12 py-3.5 text-sm text-gray-700 focus:outline-none focus:border-[#c8b6e2] focus:ring-2 focus:ring-[#c8b6e2]/20 transition-all placeholder:text-gray-400 bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            </div>
 
-              {/* Remember Me & Forgot Password (Only for Sign In) */}
-              {view === "sign_in" && (
-                <div className="flex items-center justify-between mt-1 mb-2">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <div className="relative flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-black checked:border-black focus:outline-none focus:ring-2 focus:ring-black/20 transition-all cursor-pointer"
-                      />
-                      <svg
-                        className="absolute w-2.5 h-2.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-gray-600 group-hover:text-gray-800 transition-colors">
-                      Remember me
-                    </span>
-                  </label>
-                  <a
-                    href="#"
-                    className="text-xs font-semibold text-gray-800 hover:underline"
-                  >
-                    Forgot Password
-                  </a>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="mt-2 flex flex-col gap-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-black text-white rounded-xl py-3.5 font-semibold text-sm hover:bg-gray-900 transition-all shadow-sm disabled:opacity-50"
-                >
-                  {loading ? "Memproses..." : view === "sign_in" ? "Sign In" : "Register"}
-                </button>
-
+            {view === "sign_up" && (
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  className="w-full border border-gray-200 rounded-xl pl-4 pr-12 py-3.5 text-sm text-gray-700 focus:outline-none focus:border-[#c8b6e2] focus:ring-2 focus:ring-[#c8b6e2]/20 transition-all placeholder:text-gray-400 bg-white"
+                />
                 <button
                   type="button"
-                  onClick={handleGoogleSignIn}
-                  className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 font-semibold text-sm hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center gap-3"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
-                  </svg>
-                  {view === "sign_in" ? "Sign In with Google" : "Register with Google"}
+                  <Eye className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+            )}
+
+            {view === "sign_in" && (
+              <div className="flex justify-end">
+                <a href="#" className="text-xs text-gray-500 hover:text-gray-800 transition-colors">
+                  Recovery Password
+                </a>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full text-white rounded-xl py-3.5 font-semibold text-sm transition-all shadow-md disabled:opacity-60 mt-1"
+              style={{ background: "linear-gradient(135deg, #f07070 0%, #e05c5c 100%)" }}
+            >
+              {loading ? "Memproses..." : view === "sign_in" ? "Sign In" : "Register"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">Or continue with</span>
+            <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {/* Footer */}
-          <div className="mt-8 text-center text-sm text-gray-500 pb-4">
-            {view === "sign_in" ? (
-              <p>
-                Don&apos;t have an account?{" "}
-                <button
-                  onClick={() => setView("sign_up")}
-                  className="font-bold text-black hover:underline"
-                >
-                  Sign Up
-                </button>
-              </p>
-            ) : (
-              <p>
-                Already have an account?{" "}
-                <button
-                  onClick={() => setView("sign_in")}
-                  className="font-bold text-black hover:underline"
-                >
-                  Sign In
-                </button>
-              </p>
-            )}
+          {/* OAuth Buttons */}
+          <div className="flex justify-center gap-4">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="w-14 h-14 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="w-14 h-14 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center"
+            >
+              <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.39.07 2.35.74 3.16.78 1.2-.24 2.35-.93 3.65-.84 1.56.12 2.73.72 3.51 1.91-3.19 1.93-2.42 5.89.68 7.03-.5 1.35-1.16 2.68-3 4zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="w-14 h-14 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -438,16 +362,10 @@ export default function LoginPage() {
               )}
             </div>
             <div className="flex-1">
-              <h3
-                className={`text-sm font-bold ${error ? "text-gray-900" : "text-white"}`}
-              >
+              <h3 className={`text-sm font-bold ${error ? "text-gray-900" : "text-white"}`}>
                 {error ? "Oops! Terjadi Kesalahan" : "Berhasil!"}
               </h3>
-              <p
-                className={`text-xs mt-1 leading-relaxed ${
-                  error ? "text-gray-600" : "text-gray-300"
-                }`}
-              >
+              <p className={`text-xs mt-1 leading-relaxed ${error ? "text-gray-600" : "text-gray-300"}`}>
                 {error || message}
               </p>
             </div>
