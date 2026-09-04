@@ -31,6 +31,9 @@ export async function saveWebsiteSettings(formData: FormData) {
   await supabase.from("tenants").update({ theme }).eq("id", tenant.id);
 
   // 3. Ekstrak data hero section
+  const layoutOrderStr = formData.get("layoutOrder") as string;
+  const layoutOrder = layoutOrderStr ? layoutOrderStr.split(",") : ["hero", "features", "gallery"];
+
   const heroTitle = formData.get("heroTitle") as string;
   const heroSubtitle = formData.get("heroSubtitle") as string;
   const heroCtaText = formData.get("heroCtaText") as string;
@@ -41,8 +44,9 @@ export async function saveWebsiteSettings(formData: FormData) {
     ctaText: heroCtaText,
   };
 
+  const heroOrderIndex = layoutOrder.indexOf("hero") + 1;
+
   // Upsert hero section
-  // Kita coba cek apakah hero section sudah ada
   const { data: existingHero } = await supabase
     .from("page_sections")
     .select("id")
@@ -51,13 +55,13 @@ export async function saveWebsiteSettings(formData: FormData) {
     .maybeSingle();
 
   if (existingHero) {
-    await supabase.from("page_sections").update({ content: heroContent }).eq("id", existingHero.id);
+    await supabase.from("page_sections").update({ content: heroContent, order_index: heroOrderIndex }).eq("id", existingHero.id);
   } else {
     await supabase.from("page_sections").insert({
       tenant_id: tenant.id,
       section_type: "hero",
       content: heroContent,
-      order_index: 1,
+      order_index: heroOrderIndex,
     });
   }
 
@@ -75,6 +79,8 @@ export async function saveWebsiteSettings(formData: FormData) {
     ].filter(f => f.text) // Hapus yang kosong
   };
 
+  const featuresOrderIndex = layoutOrder.indexOf("features") + 1;
+
   const { data: existingFeatures } = await supabase
     .from("page_sections")
     .select("id")
@@ -83,13 +89,13 @@ export async function saveWebsiteSettings(formData: FormData) {
     .maybeSingle();
 
   if (existingFeatures) {
-    await supabase.from("page_sections").update({ content: featuresContent }).eq("id", existingFeatures.id);
+    await supabase.from("page_sections").update({ content: featuresContent, order_index: featuresOrderIndex }).eq("id", existingFeatures.id);
   } else {
     await supabase.from("page_sections").insert({
       tenant_id: tenant.id,
       section_type: "features",
       content: featuresContent,
-      order_index: 2,
+      order_index: featuresOrderIndex,
     });
   }
 

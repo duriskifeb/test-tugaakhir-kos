@@ -55,15 +55,9 @@ export default async function PublicTenantPage(props: {
     .eq("tenant_id", tenant.id)
     .order("order_index", { ascending: true });
 
-  // Parsing seksi
-  const heroSection: { title: string; subtitle: string; ctaText: string } =
-    sections?.find((s) => s.section_type === "hero")?.content as
-      | { title: string; subtitle: string; ctaText: string }
-      | null ?? defaultContent.hero;
-  const featuresSection: { title: string; items: { icon: string; text: string }[] } =
-    sections?.find((s) => s.section_type === "features")?.content as
-      | { title: string; items: { icon: string; text: string }[] }
-      | null ?? defaultContent.features;
+  // Parsing seksi fallback
+  const heroSection = sections?.find((s) => s.section_type === "hero")?.content as any ?? defaultContent.hero;
+  const featuresSection = sections?.find((s) => s.section_type === "features")?.content as any ?? defaultContent.features;
 
   // 4. Ambil data kamar aktif
   const { data: rooms } = await supabase
@@ -81,8 +75,13 @@ export default async function PublicTenantPage(props: {
     }).format(number);
   };
 
+  // 5. Tentukan Urutan Render Layout Berdasarkan Database
+  const sectionTypesToRender = sections && sections.length > 0 
+    ? sections.map(s => s.section_type) 
+    : ["hero", "features"];
+
   return (
-    <div style={{ fontFamily: theme.fontFamily }} className="min-h-screen bg-gray-50 flex flex-col">
+    <div style={{ fontFamily: theme.fontFamily }} className="min-h-screen bg-gray-50 flex flex-col selection:bg-indigo-100">
       {/* Dynamic CSS Variables */}
       <style dangerouslySetInnerHTML={{__html: `
         :root {
@@ -105,49 +104,73 @@ export default async function PublicTenantPage(props: {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section id="hero" className="bg-primary text-white py-20 md:py-32 px-6 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-            {heroSection.title}
-          </h1>
-          <p className="text-lg md:text-xl opacity-90 mb-10 max-w-2xl mx-auto leading-relaxed">
-            {heroSection.subtitle}
-          </p>
-          <a 
-            href="#kamar"
-            className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full text-lg hover:shadow-lg transition-all transform hover:-translate-y-1"
-          >
-            {heroSection.ctaText}
-          </a>
-        </div>
-        {/* Dekorasi Latar Belakang */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <polygon fill="currentColor" points="0,100 100,0 100,100" />
-          </svg>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="fasilitas" className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">{featuresSection.title}</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuresSection.items.map((item: any, idx: number) => (
-              <div key={idx} className="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm text-primary">
-                  <CheckCircle2 className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.text}</h3>
+      {/* Render Sections Dinamis sesuai urutan Drag-and-Drop */}
+      {sectionTypesToRender.map((type, index) => {
+        if (type === "hero") {
+          return (
+            <section key={`sec-${index}`} id="hero" className="bg-primary text-white py-20 md:py-32 px-6 relative overflow-hidden">
+              <div className="max-w-4xl mx-auto text-center relative z-10">
+                <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                  {heroSection.title}
+                </h1>
+                <p className="text-lg md:text-xl opacity-90 mb-10 max-w-2xl mx-auto leading-relaxed">
+                  {heroSection.subtitle}
+                </p>
+                <a 
+                  href="#kamar"
+                  className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full text-lg hover:shadow-lg transition-all transform hover:-translate-y-1"
+                >
+                  {heroSection.ctaText}
+                </a>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              {/* Dekorasi Latar Belakang */}
+              <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <polygon fill="currentColor" points="0,100 100,0 100,100" />
+                </svg>
+              </div>
+            </section>
+          );
+        }
 
-      {/* Rooms Section */}
+        if (type === "features") {
+          return (
+            <section key={`sec-${index}`} id="fasilitas" className="py-20 px-6 bg-white border-b border-gray-100">
+              <div className="max-w-6xl mx-auto text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-12">{featuresSection.title}</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {featuresSection.items.map((item: any, idx: number) => (
+                    <div key={idx} className="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow">
+                      <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm text-primary">
+                        <CheckCircle2 className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{item.text}</h3>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        if (type === "gallery") {
+          return (
+            <section key={`sec-${index}`} id="galeri" className="py-20 px-6 bg-white border-b border-gray-100">
+              <div className="max-w-6xl mx-auto text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-12">Galeri Foto</h2>
+                <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50 text-gray-400 font-medium">
+                  Belum ada foto yang diunggah ke Galeri.
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        return null;
+      })}
+
+      {/* Rooms Section (Statis di bawah) */}
       <section id="kamar" className="py-20 px-6 bg-gray-50 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
