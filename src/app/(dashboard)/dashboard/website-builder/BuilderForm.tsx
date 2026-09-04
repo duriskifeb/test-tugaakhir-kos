@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { saveWebsiteSettings } from "./actions";
 import { 
   Loader2, Save, LayoutTemplate, Type, Palette, 
-  MonitorSmartphone, CheckCircle2, GripVertical, Image as ImageIcon
+  MonitorSmartphone, CheckCircle2, GripVertical, Image as ImageIcon, BedDouble
 } from "lucide-react";
 import { 
   DndContext, 
@@ -93,8 +93,15 @@ export function BuilderForm({
   const [sections, setSections] = useState([
     { id: 'hero', title: 'Teks Pembuka (Hero)', icon: Type },
     { id: 'features', title: 'Fasilitas & Keunggulan', icon: CheckCircle2 },
-    { id: 'gallery', title: 'Galeri Foto (Akan Datang)', icon: ImageIcon },
+    { id: 'rooms', title: 'Daftar Kamar (Otomatis)', icon: BedDouble },
+    { id: 'gallery', title: 'Galeri Foto', icon: ImageIcon },
   ]);
+
+  // Fix Hydration mismatch
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // State untuk tab aktif (Theme atau Section ID tertentu)
   const [activeTab, setActiveTab] = useState<string>('theme');
@@ -178,27 +185,38 @@ export function BuilderForm({
           {/* Susunan Blok (Drag and Drop) */}
           <div className="p-4 border-t border-gray-200">
             <h2 className="text-xs font-bold text-gray-500 tracking-wider uppercase mb-3">Susunan Layout</h2>
-            <DndContext 
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext 
-                items={sections.map(s => s.id)}
-                strategy={verticalListSortingStrategy}
+            {isMounted ? (
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                {sections.map((section) => (
-                  <SortableSectionItem 
-                    key={section.id} 
-                    id={section.id} 
-                    title={section.title}
-                    icon={section.icon}
-                    isActive={activeTab === section.id}
-                    onClick={() => setActiveTab(section.id)}
-                  />
+                <SortableContext 
+                  items={sections.map(s => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {sections.map((section) => (
+                    <SortableSectionItem 
+                      key={section.id} 
+                      id={section.id} 
+                      title={section.title}
+                      icon={section.icon}
+                      isActive={activeTab === section.id}
+                      onClick={() => setActiveTab(section.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <div className="space-y-2 opacity-50">
+                {sections.map(section => (
+                  <div key={section.id} className="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-3">
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm font-medium">{section.title}</span>
+                  </div>
                 ))}
-              </SortableContext>
-            </DndContext>
+              </div>
+            )}
             <p className="text-[11px] text-gray-400 mt-2 italic">*Geser icon titik-titik untuk mengubah urutan blok pada website.</p>
           </div>
         </div>
@@ -221,14 +239,23 @@ export function BuilderForm({
       <div className="hidden lg:flex w-1/3 border-r border-gray-200 bg-white flex-col overflow-y-auto">
         <form id="builder-form" onSubmit={handleSubmit} className="p-6">
           <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6">
-            {activeTab === 'theme' && 'Pengaturan Tema'}
+            {activeTab === 'theme' && 'Pengaturan Tema & Template'}
             {activeTab === 'hero' && 'Pengaturan Hero Section'}
             {activeTab === 'features' && 'Pengaturan Fasilitas'}
+            {activeTab === 'rooms' && 'Pengaturan Daftar Kamar'}
             {activeTab === 'gallery' && 'Pengaturan Galeri'}
           </h2>
 
           <div className={activeTab === 'theme' ? 'block' : 'hidden'}>
             <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Template Layout</label>
+                <select name="templateStyle" defaultValue={theme.templateStyle || "modern"} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#3b23c6]">
+                  <option value="modern">Modern (Tepi Melengkung, Bayangan Halus)</option>
+                  <option value="minimalist">Minimalis (Garis Tegas, Bersih)</option>
+                  <option value="bold">Bold (Kontras Tinggi, Elegan)</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Warna Utama (Primary Color)</label>
                 <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -286,10 +313,58 @@ export function BuilderForm({
             </div>
           </div>
 
+          <div className={activeTab === 'rooms' ? 'block' : 'hidden'}>
+             <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Judul Bagian Kamar</label>
+                <input type="text" name="roomsTitle" defaultValue={(featuresData as any)?.roomsTitle || "Pilihan Kamar"} placeholder="Kamar yang Tersedia" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#3b23c6]" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nomor WhatsApp Booking</label>
+                <input type="text" name="whatsappNumber" defaultValue={(featuresData as any)?.whatsappNumber || ""} placeholder="6281234567890 (Gunakan 62)" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#3b23c6]" />
+                <p className="text-xs text-gray-500 mt-1">Nomor ini akan digunakan saat calon penyewa mengklik tombol "Pesan via WhatsApp".</p>
+              </div>
+              <div className="p-4 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 mt-4">
+                <p className="text-sm font-medium">Info: Daftar kamar akan diambil secara otomatis dari menu <strong>Manajemen Kamar</strong>.</p>
+              </div>
+            </div>
+          </div>
+
           <div className={activeTab === 'gallery' ? 'block' : 'hidden'}>
-            <div className="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center">
-              <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 font-medium">Fitur Upload Galeri Foto akan segera hadir pada iterasi berikutnya.</p>
+             <div className="space-y-4">
+               <p className="text-sm text-gray-600 mb-4">Unggah maksimal 6 foto untuk galeri kos Anda.</p>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 {[0, 1, 2, 3, 4, 5].map((index) => {
+                   const existingImage = (featuresData as any)?.images?.[index]?.url;
+                   return (
+                     <div key={`gallery-${index}`} className="relative group aspect-[4/3] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center overflow-hidden hover:bg-gray-100 transition-colors">
+                       <input 
+                         type="file" 
+                         name={`galleryImage${index}`} 
+                         accept="image/*"
+                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                       />
+                       {existingImage && (
+                         <input type="hidden" name={`existingGalleryUrl${index}`} value={existingImage} />
+                       )}
+                       
+                       {existingImage ? (
+                         // eslint-disable-next-line @next/next/no-img-element
+                         <img src={existingImage} alt="Gallery item" className="absolute inset-0 w-full h-full object-cover z-10" />
+                       ) : (
+                         <>
+                           <ImageIcon className="w-6 h-6 text-gray-400 mb-2" />
+                           <span className="text-[10px] font-medium text-gray-500">Pilih Foto</span>
+                         </>
+                       )}
+                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                         <span className="text-white text-xs font-bold">Ubah Foto</span>
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
             </div>
           </div>
         </form>
