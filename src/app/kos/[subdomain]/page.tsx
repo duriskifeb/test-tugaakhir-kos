@@ -125,6 +125,13 @@ export default async function PublicTenantPage(props: {
     return `https://wa.me/${cleanNumber}?text=${message}`;
   };
 
+  const generateComplaintLink = () => {
+    if (!waNumber) return "#";
+    const cleanNumber = waNumber.replace(/\D/g, '');
+    const message = encodeURIComponent(`Halo Admin ${tenant.name}, saya penghuni kos ingin mengajukan laporan keluhan/kerusakan fasilitas. [Jelaskan keluhan di sini]`);
+    return `https://wa.me/${cleanNumber}?text=${message}`;
+  };
+
   // Tema Template (modern, minimalist, bold)
   const templateStyle = theme.templateStyle || "modern";
   
@@ -159,11 +166,20 @@ export default async function PublicTenantPage(props: {
         <div className="font-bold text-xl text-primary flex items-center gap-2">
           {tenant.name}
         </div>
-        <div className="hidden md:flex gap-6 text-sm font-medium text-gray-600">
+        <div className="hidden md:flex gap-6 items-center text-sm font-medium text-gray-600">
           <a href="#hero" className="hover:text-primary transition-colors">Beranda</a>
           <a href="#fasilitas" className="hover:text-primary transition-colors">Fasilitas</a>
           <a href="#kamar" className="hover:text-primary transition-colors">Kamar</a>
           {gallerySection.images?.length > 0 && <a href="#galeri" className="hover:text-primary transition-colors">Galeri</a>}
+          
+          {/* Tombol Lapor Kerusakan */}
+          <a 
+            href={generateComplaintLink()} 
+            target="_blank"
+            className="ml-4 bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors shadow-sm"
+          >
+            Lapor Keluhan
+          </a>
         </div>
       </nav>
 

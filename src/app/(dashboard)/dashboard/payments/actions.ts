@@ -2,88 +2,93 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-export async function addPayment(formData: FormData) {
+// Mengambil data tagihan
+export async function getPaymentsData() {
   const supabase = await createClient();
-  const renterId = formData.get("renterId") as string;
-  const amountStr = formData.get("amount") as string;
-  const dueDate = formData.get("dueDate") as string;
-
-  if (!renterId || !amountStr || !dueDate) {
-    throw new Error("Semua field wajib diisi.");
-  }
-
-  const amount = parseFloat(amountStr);
-  if (isNaN(amount) || amount <= 0) {
-    throw new Error("Nominal tagihan tidak valid.");
-  }
-
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
 
-  // Get tenant ID
-  let tenantId = null;
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  
-  if (profile?.role === "staff") {
-    const { data: staffData } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email ?? "").eq("status", "active").single();
-    tenantId = staffData?.tenant_id;
-  } else {
-    const { data: tenantData } = await supabase.from("tenants").select("id").eq("owner_id", user.id).maybeSingle();
-    tenantId = tenantData?.id;
+  if (!user) return { payments: [], renters: [] };
+
+  // Ambil tenant_id
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("id")
+    .eq("owner_id", user.id)
+    .single();
+
+  if (!tenant) {
+    const { data: staff } = await supabase
+      .from("tenant_staffs")
+      .select("tenant_id")
+      .eq("profile_id", user.id)
+      .single();
+    if (!staff) return { payments: [], renters: [] };
+    tenant.id = staff.tenant_id;
   }
 
-  if (!tenantId) throw new Error("Kos belum terdaftar.");
+  // Fetch payments dan relasi ke renter & room
+  const { data: payments, error: payError } = await supabase
+    .from("payments")
+    .select(`
+      *,
+      renters ( 
+        full_name, 
+        rooms ( name ) 
+      )
+    `)
+    .eq("tenant_id", tenant.id)
+    .order("due_date", { ascending: false });
+
+  // Fetch active renters untuk form tagihan baru
+  const { data: renters, error: rentError } = await supabase
+    .from("renters")
+    .select(`id, full_name, rooms(name)`)
+    .eq("tenant_id", tenant.id)
+    .eq("status", "active");
+
+  return { 
+    payments: payments || [], 
+    renters: renters || []
+  };
+}
+
+// Membuat tagihan baru
+export async function createPayment(formData: FormData) {
+  const supabase = await createClient();
+  const tenantId = formData.get("tenantId") as string;
+  const renterId = formData.get("renterId") as string;
+  const amount = formData.get("amount") as string;
+  const dueDate = formData.get("dueDate") as string;
 
   const { error } = await supabase.from("payments").insert({
     tenant_id: tenantId,
     renter_id: renterId,
-    amount: amount,
+    amount: parseFloat(amount),
     due_date: dueDate,
     status: "unpaid"
   });
 
-  if (error) {
-    console.error("Gagal menambah tagihan:", error);
-    throw new Error("Terjadi kesalahan saat membuat tagihan.");
-  }
+  if (error) return { error: error.message };
 
   revalidatePath("/dashboard/payments");
-  redirect("/dashboard/payments");
+  return { success: true };
 }
 
-export async function markAsPaid(formData: FormData) {
+// Verifikasi Pembayaran (Ubah status jadi Lunas)
+export async function verifyPayment(id: string) {
   const supabase = await createClient();
-  const id = formData.get("id") as string;
-
-  if (!id) throw new Error("ID tidak valid.");
-
-  const { error } = await supabase.from("payments").update({ 
-    status: "paid",
-    paid_at: new Date().toISOString()
-  }).eq("id", id);
   
-  if (error) {
-    throw new Error("Gagal mengupdate status tagihan.");
-  }
+  const { error } = await supabase
+    .from("payments")
+    .update({ 
+      status: "paid", 
+      paid_at: new Date().toISOString() 
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
 
   revalidatePath("/dashboard/payments");
-  redirect("/dashboard/payments");
-}
-
-export async function deletePayment(formData: FormData) {
-  const supabase = await createClient();
-  const id = formData.get("id") as string;
-
-  if (!id) throw new Error("ID tidak valid.");
-
-  const { error } = await supabase.from("payments").delete().eq("id", id);
-  
-  if (error) {
-    throw new Error("Gagal menghapus tagihan.");
-  }
-
-  revalidatePath("/dashboard/payments");
-  redirect("/dashboard/payments");
+  return { success: true };
 }

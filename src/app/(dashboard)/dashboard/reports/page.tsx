@@ -1,24 +1,41 @@
-import { BarChart3 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import ReportsClient from "./ReportsClient";
 
 export default async function ReportsPage() {
-  return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Laporan & Analitik (Reports)</h1>
-        <p className="text-gray-500 mt-1">
-          Lihat grafik pendapatan, tingkat hunian, dan performa bisnis kos Anda.
-        </p>
-      </div>
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return null;
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
-          <BarChart3 className="w-8 h-8 text-emerald-600" />
-        </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-2">Segera Hadir: Laporan Mendalam</h3>
-        <p className="text-gray-500 max-w-md">
-          Fitur analitik dan grafik laporan lengkap sedang dalam tahap pengembangan.
-        </p>
-      </div>
+  // Dapatkan tenantId
+  let tenantId = "";
+  const { data: tenant } = await supabase.from("tenants").select("id").eq("owner_id", user.id).single();
+  
+  if (tenant) {
+    tenantId = tenant.id;
+  } else {
+    const { data: staff } = await supabase.from("tenant_staffs").select("tenant_id").eq("profile_id", user.id).single();
+    if (staff) tenantId = staff.tenant_id;
+  }
+
+  // Fetch all necessary data for reports
+  const [
+    { data: payments }, 
+    { count: roomsCount }, 
+    { count: rentersCount }
+  ] = await Promise.all([
+    supabase.from("payments").select("*").eq("tenant_id", tenantId),
+    supabase.from("rooms").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabase.from("renters").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("status", "active")
+  ]);
+
+  return (
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+      <ReportsClient 
+        paymentsData={payments || []}
+        roomsCount={roomsCount || 0}
+        rentersCount={rentersCount || 0}
+      />
     </div>
   );
 }

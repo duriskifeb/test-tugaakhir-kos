@@ -11,6 +11,7 @@ export default async function AdminVerifikasiPage() {
     .select(`
       id,
       name,
+      subdomain,
       status,
       created_at,
       owner_id,
@@ -68,7 +69,10 @@ export default async function AdminVerifikasiPage() {
               {boardingHouses && boardingHouses.length > 0 ? (
                 boardingHouses.map((bh: any) => (
                   <tr key={bh.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{bh.name}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      <div>{bh.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{bh.subdomain}.domain.com</div>
+                    </td>
                     <td className="px-6 py-4">{bh.profiles?.full_name || "Unknown"}</td>
                     <td className="px-6 py-4">
                       <div>{bh.profiles?.email || "-"}</div>
