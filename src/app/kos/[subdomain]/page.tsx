@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { BedDouble, CheckCircle2, MapPin } from "lucide-react";
 import Head from "next/head";
+import { BookingModal } from "./BookingModal";
 
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate at most every hour
@@ -282,23 +283,11 @@ export default async function PublicTenantPage(props: {
                           )}
 
                           <div className="mt-auto pt-4 border-t border-gray-100">
-                            {waNumber ? (
-                              <a 
-                                href={generateWaLink(room.name)} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className={`w-full flex items-center justify-center gap-2 py-3 px-4 font-bold transition-all ${getButtonClass()}`}
-                              >
-                                Pesan Sekarang
-                              </a>
-                            ) : (
-                              <button 
-                                disabled
-                                className="w-full flex items-center justify-center gap-2 py-3 px-4 font-bold bg-gray-200 text-gray-500 rounded-xl cursor-not-allowed"
-                              >
-                                Kontak belum diset
-                              </button>
-                            )}
+                            <BookingModal 
+                              tenantId={tenant.id} 
+                              room={{ id: room.id, name: room.name, price: room.price }} 
+                              buttonClass={getButtonClass()} 
+                            />
                           </div>
                         </div>
                       </div>

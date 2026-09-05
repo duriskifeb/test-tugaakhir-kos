@@ -67,7 +67,7 @@ export function Topbar({
   };
 
   return (
-    <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
+    <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-50">
       
       <div className="flex flex-1 items-center gap-4">
         {/* Tenant Switcher (Multi-Cabang) */}
