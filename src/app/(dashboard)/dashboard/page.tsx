@@ -41,14 +41,31 @@ export default async function DashboardPage() {
       }
     }
   } else {
-    const { data: tenantData } = await supabase
+    // OWNER LOGIC: Retrieve the correct active tenant from cookie or fallback to first tenant
+    const { data: allTenants } = await supabase
       .from("tenants")
       .select("id, status")
       .eq("owner_id", user.id)
-      .maybeSingle();
-    if (tenantData) {
-      boardingHouse = { id: tenantData.id, status: tenantData.status ?? "UNVERIFIED" };
-      tenantId = tenantData.id;
+      .order("created_at", { ascending: true });
+      
+    if (allTenants && allTenants.length > 0) {
+      // Ambil ID dari cookies yang dikirim oleh client/browser
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+      
+      let activeTenant = null;
+      if (savedTenantId) {
+        activeTenant = allTenants.find(t => t.id === savedTenantId);
+      }
+      
+      // Jika cookie tidak valid/tidak ada, pakai tenant yang pertama dibuat
+      if (!activeTenant) {
+        activeTenant = allTenants[0];
+      }
+
+      boardingHouse = { id: activeTenant.id, status: activeTenant.status ?? "UNVERIFIED" };
+      tenantId = activeTenant.id;
     }
   }
 

@@ -10,15 +10,28 @@ export default async function WebsiteBuilderPage() {
     redirect("/login");
   }
 
-  // 1. Ambil data tenant
-  const { data: tenant } = await supabase
+  // 1. Ambil data tenant yang sedang aktif dari cookies atau tenant pertama
+  const { data: allTenants } = await supabase
     .from("tenants")
     .select("*")
     .eq("owner_id", user.id)
-    .single();
+    .order("created_at", { ascending: true });
 
-  if (!tenant) {
+  if (!allTenants || allTenants.length === 0) {
     redirect("/dashboard");
+  }
+
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+  
+  let tenant = null;
+  if (savedTenantId) {
+    tenant = allTenants.find(t => t.id === savedTenantId);
+  }
+  
+  if (!tenant) {
+    tenant = allTenants[0];
   }
 
   // 2. Ambil data page sections

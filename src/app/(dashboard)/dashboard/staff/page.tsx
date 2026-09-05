@@ -12,15 +12,23 @@ export default async function StaffPage() {
     redirect("/login");
   }
 
-  // 1. Ambil data tenant
-  const { data: tenant } = await supabase
+  // 1. Ambil data tenant dengan logic Multi-Cabang
+  const { data: allTenants } = await supabase
     .from("tenants")
     .select("id")
-    .eq("owner_id", user.id)
-    .single();
+    .eq("owner_id", user.id);
 
-  if (!tenant) {
+  if (!allTenants || allTenants.length === 0) {
     redirect("/dashboard"); // Hanya pemilik kos yang boleh akses halaman ini
+  }
+
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+  
+  let tenant = allTenants[0];
+  if (savedTenantId && allTenants.some(t => t.id === savedTenantId)) {
+    tenant = { id: savedTenantId };
   }
 
   // 2. Ambil data staf

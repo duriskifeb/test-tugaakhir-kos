@@ -16,16 +16,26 @@ export async function addStaff(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  // Get tenant ID
-  const { data: tenant } = await supabase
+  // Get tenant ID (Multi-Cabang Support)
+  const { data: allTenants } = await supabase
     .from("tenants")
     .select("id")
-    .eq("owner_id", user.id)
-    .single();
+    .eq("owner_id", user.id);
 
-  if (!tenant) {
+  if (!allTenants || allTenants.length === 0) {
     return { error: "Kos belum terdaftar." };
   }
+
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+  
+  let tenantId = allTenants[0].id;
+  if (savedTenantId && allTenants.some(t => t.id === savedTenantId)) {
+    tenantId = savedTenantId;
+  }
+  
+  const tenant = { id: tenantId };
 
   const { error } = await supabase.from("tenant_staffs").insert({
     tenant_id: tenant.id,

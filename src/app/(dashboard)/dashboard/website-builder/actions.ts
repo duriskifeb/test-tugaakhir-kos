@@ -11,16 +11,26 @@ export async function saveWebsiteSettings(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
-  // 1. Ambil tenant
-  const { data: tenant } = await supabase
+  // 1. Ambil tenant dengan dukungan multi-cabang (cookie)
+  const { data: allTenants } = await supabase
     .from("tenants")
     .select("id")
-    .eq("owner_id", user.id)
-    .single();
+    .eq("owner_id", user.id);
 
-  if (!tenant) {
+  if (!allTenants || allTenants.length === 0) {
     return { error: "Kos belum terdaftar." };
   }
+  
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+  
+  let tenantId = allTenants[0].id;
+  if (savedTenantId && allTenants.some(t => t.id === savedTenantId)) {
+    tenantId = savedTenantId;
+  }
+  
+  const tenant = { id: tenantId };
 
   // 2. Ekstrak data tema
   const primaryColor = formData.get("primaryColor") as string;

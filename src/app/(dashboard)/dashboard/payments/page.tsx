@@ -11,11 +11,21 @@ export default async function PaymentsPage() {
   
   let tenantId = "";
   if (user) {
-    const { data: tenant } = await supabase.from("tenants").select("id").eq("owner_id", user.id).single();
-    if (tenant) {
-      tenantId = tenant.id;
+    const { data: allTenants } = await supabase.from("tenants").select("id").eq("owner_id", user.id);
+    
+    if (allTenants && allTenants.length > 0) {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+      
+      if (savedTenantId && allTenants.some(t => t.id === savedTenantId)) {
+        tenantId = savedTenantId;
+      } else {
+        tenantId = allTenants[0].id;
+      }
     } else {
-      const { data: staff } = await supabase.from("tenant_staffs").select("tenant_id").eq("profile_id", user.id).single();
+      // Logic for staff (they only have 1 active assigned tenant usually)
+      const { data: staff } = await supabase.from("tenant_staffs").select("tenant_id").eq("email", user.email ?? "").eq("status", "active").maybeSingle();
       if (staff) tenantId = staff.tenant_id;
     }
   }

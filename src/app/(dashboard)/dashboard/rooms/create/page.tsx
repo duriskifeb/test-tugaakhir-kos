@@ -38,9 +38,12 @@ export default function CreateRoomPage() {
       if (result?.error) {
         setError(result.error);
         setLoading(false);
+      } else if (result?.success) {
+        window.location.href = "/dashboard/rooms";
       }
     } catch (err) {
-      setError("Terjadi kesalahan jaringan.");
+      console.error(err);
+      setError("Terjadi kesalahan sistem.");
       setLoading(false);
     }
   }

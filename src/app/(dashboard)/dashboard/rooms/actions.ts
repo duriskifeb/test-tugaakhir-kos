@@ -43,12 +43,23 @@ export async function createRoom(formData: FormData) {
       .maybeSingle();
     tenantId = staffData?.tenant_id;
   } else {
-    const { data: tenantData } = await supabase
+    // Multi-cabang support for owners using cookies
+    const { data: allTenants } = await supabase
       .from("tenants")
       .select("id")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-    tenantId = tenantData?.id;
+      .eq("owner_id", user.id);
+      
+    if (allTenants && allTenants.length > 0) {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+      
+      if (savedTenantId && allTenants.some(t => t.id === savedTenantId)) {
+        tenantId = savedTenantId;
+      } else {
+        tenantId = allTenants[0].id;
+      }
+    }
   }
 
   if (!tenantId) {
@@ -69,7 +80,7 @@ export async function createRoom(formData: FormData) {
   }
 
   revalidatePath("/dashboard/rooms");
-  redirect("/dashboard/rooms");
+  return { success: true };
 }
 
 export async function deleteRoom(formData: FormData) {

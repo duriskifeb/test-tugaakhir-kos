@@ -24,12 +24,24 @@ export default async function RoomsPage() {
       .maybeSingle();
     tenantId = staffData?.tenant_id;
   } else {
-    const { data: tenantData } = await supabase
+    // Owner Logic: Support for active_tenant_id cookie
+    const { data: tenantsData } = await supabase
       .from("tenants")
       .select("id")
       .eq("owner_id", user.id)
-      .maybeSingle();
-    tenantId = tenantData?.id;
+      .order("created_at", { ascending: true });
+      
+    if (tenantsData && tenantsData.length > 0) {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const savedTenantId = cookieStore.get('active_tenant_id')?.value;
+      
+      if (savedTenantId && tenantsData.some(t => t.id === savedTenantId)) {
+        tenantId = savedTenantId;
+      } else {
+        tenantId = tenantsData[0].id;
+      }
+    }
   }
 
   if (!tenantId) {
